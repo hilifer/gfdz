@@ -13,6 +13,9 @@ from app.tasks.scheduler import start_scheduler, stop_scheduler
 
 # 确保适配器被注册
 import app.adapters.demo_adapter  # noqa: F401
+import app.adapters.huawei_adapter  # noqa: F401
+import app.adapters.aiswei_adapter  # noqa: F401
+import app.adapters.sungrow_adapter  # noqa: F401
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)

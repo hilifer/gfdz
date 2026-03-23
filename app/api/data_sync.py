@@ -10,7 +10,7 @@ from app.models.manufacturer import Manufacturer
 from app.models.power_station import PowerStation
 from app.models.generation_data import GenerationData
 from app.models.alarm import Alarm
-from app.adapters import AdapterRegistry
+from app.adapters import AdapterRegistry, RateLimitManager
 
 router = APIRouter(prefix="/api/sync", tags=["数据同步"])
 
@@ -174,4 +174,20 @@ async def sync_all_stations(db: AsyncSession = Depends(get_db)):
         "success": success_count,
         "failed": fail_count,
         "errors": errors,
+    }
+
+
+@router.get("/rate-limits")
+async def get_rate_limit_stats():
+    """查看所有平台的限流统计信息"""
+    return RateLimitManager.get_all_stats()
+
+
+@router.get("/adapters")
+async def list_registered_adapters():
+    """查看已注册的适配器列表"""
+    adapters = AdapterRegistry.get_all()
+    return {
+        code: adapter_cls.__name__
+        for code, adapter_cls in adapters.items()
     }
