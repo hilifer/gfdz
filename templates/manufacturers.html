@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}厂家管理 - 光伏电站监控平台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-gear"></i> 厂家管理</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mfrModal" onclick="resetMfrForm()">
+        <i class="bi bi-plus-lg"></i> 添加厂家
+    </button>
+</div>
+
+<div class="row" id="mfr-cards">
+    <div class="col-12 text-center text-muted">加载中...</div>
+</div>
+
+<!-- 添加/编辑厂家弹窗 -->
+<div class="modal fade" id="mfrModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mfrModalTitle">添加厂家</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="mfrForm">
+                    <input type="hidden" id="mf-id">
+                    <div class="mb-3">
+                        <label class="form-label">厂家名称 *</label>
+                        <input type="text" class="form-control" id="mf-name" required placeholder="如: 华为、阳光电源">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">厂家编码 *</label>
+                        <input type="text" class="form-control" id="mf-code" required placeholder="如: huawei、sungrow，用于匹配适配器">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">API基础地址</label>
+                        <input type="text" class="form-control" id="mf-url" placeholder="https://api.example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">适配器类名</label>
+                        <input type="text" class="form-control" id="mf-adapter" placeholder="与编码一致即可">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">认证配置(JSON)</label>
+                        <textarea class="form-control" id="mf-auth" rows="3" placeholder='{"username":"","password":""}'></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">描述</label>
+                        <textarea class="form-control" id="mf-desc" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveMfr()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', loadManufacturers);
+
+async function loadManufacturers() {
+    const data = await api('/api/manufacturers');
+    const container = document.getElementById('mfr-cards');
+    if (data.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center text-muted">暂无厂家，请先添加</div>';
+        return;
+    }
+    container.innerHTML = data.map(m => `
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">${m.name}
+                        <span class="badge ${m.is_active ? 'bg-success' : 'bg-secondary'} ms-2">${m.is_active ? '启用' : '停用'}</span>
+                    </h5>
+                    <p class="card-text text-muted mb-1">编码: ${m.code}</p>
+                    <p class="card-text text-muted mb-1">API: ${m.api_base_url || '未配置'}</p>
+                    <p class="card-text text-muted mb-1">适配器: ${m.adapter_class || '未配置'}</p>
+                    ${m.description ? `<p class="card-text">${m.description}</p>` : ''}
+                </div>
+                <div class="card-footer d-flex justify-content-end gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editMfr(${m.id})"><i class="bi bi-pencil"></i> 编辑</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMfr(${m.id})"><i class="bi bi-trash"></i> 删除</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function resetMfrForm() {
+    document.getElementById('mfrModalTitle').textContent = '添加厂家';
+    document.getElementById('mfrForm').reset();
+    document.getElementById('mf-id').value = '';
+}
+
+async function editMfr(id) {
+    const m = await api(`/api/manufacturers/${id}`);
+    resetMfrForm();
+    document.getElementById('mfrModalTitle').textContent = '编辑厂家';
+    document.getElementById('mf-id').value = m.id;
+    document.getElementById('mf-name').value = m.name;
+    document.getElementById('mf-code').value = m.code;
+    document.getElementById('mf-url').value = m.api_base_url || '';
+    document.getElementById('mf-adapter').value = m.adapter_class || '';
+    document.getElementById('mf-auth').value = m.auth_config || '';
+    document.getElementById('mf-desc').value = m.description || '';
+    new bootstrap.Modal(document.getElementById('mfrModal')).show();
+}
+
+async function saveMfr() {
+    const id = document.getElementById('mf-id').value;
+    const data = {
+        name: document.getElementById('mf-name').value,
+        code: document.getElementById('mf-code').value,
+        api_base_url: document.getElementById('mf-url').value || null,
+        adapter_class: document.getElementById('mf-adapter').value || '',
+        auth_config: document.getElementById('mf-auth').value || null,
+        description: document.getElementById('mf-desc').value || null,
+    };
+    if (id) {
+        await api(`/api/manufacturers/${id}`, 'PUT', data);
+    } else {
+        await api('/api/manufacturers', 'POST', data);
+    }
+    bootstrap.Modal.getInstance(document.getElementById('mfrModal')).hide();
+    loadManufacturers();
+}
+
+async function deleteMfr(id) {
+    if (!confirm('确定删除此厂家？')) return;
+    await api(`/api/manufacturers/${id}`, 'DELETE');
+    loadManufacturers();
+}
+</script>
+{% endblock %}

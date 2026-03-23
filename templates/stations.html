@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}电站管理 - 光伏电站监控平台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-building"></i> 电站管理</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stationModal" onclick="resetStationForm()">
+        <i class="bi bi-plus-lg"></i> 添加电站
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>电站名称</th>
+                        <th>电站编码</th>
+                        <th>所属厂家</th>
+                        <th>装机容量(kWp)</th>
+                        <th>地址</th>
+                        <th>状态</th>
+                        <th>监控</th>
+                        <th>最后同步</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="stations-tbody">
+                    <tr><td colspan="10" class="text-center text-muted">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑电站弹窗 -->
+<div class="modal fade" id="stationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stationModalTitle">添加电站</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="stationForm">
+                    <input type="hidden" id="sf-id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">电站名称 *</label>
+                            <input type="text" class="form-control" id="sf-name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">电站编码 *</label>
+                            <input type="text" class="form-control" id="sf-code" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">所属厂家 *</label>
+                            <select class="form-select" id="sf-manufacturer" required>
+                                <option value="">请选择厂家</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">装机容量(kWp)</label>
+                            <input type="number" step="0.01" class="form-control" id="sf-capacity">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">地址</label>
+                            <input type="text" class="form-control" id="sf-location">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">经度</label>
+                            <input type="number" step="0.000001" class="form-control" id="sf-lng">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">纬度</label>
+                            <input type="number" step="0.000001" class="form-control" id="sf-lat">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">联系人</label>
+                            <input type="text" class="form-control" id="sf-contact">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">联系电话</label>
+                            <input type="text" class="form-control" id="sf-phone">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">额外参数(JSON)</label>
+                        <textarea class="form-control" id="sf-extra" rows="3" placeholder='{"key": "value"}'></textarea>
+                        <small class="text-muted">不同厂家可能需要不同的额外参数，如appKey、appSecret等</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveStation()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let manufacturers = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    manufacturers = await api('/api/manufacturers');
+    loadStations();
+});
+
+async function loadStations() {
+    const stations = await api('/api/stations');
+    const tbody = document.getElementById('stations-tbody');
+    if (stations.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">暂无电站</td></tr>';
+        return;
+    }
+    tbody.innerHTML = stations.map(s => {
+        const mfr = manufacturers.find(m => m.id === s.manufacturer_id);
+        return `<tr>
+            <td>${s.id}</td>
+            <td><a href="/stations/${s.id}">${s.name}</a></td>
+            <td>${s.station_code}</td>
+            <td>${mfr ? mfr.name : '-'}</td>
+            <td>${s.capacity || '-'}</td>
+            <td>${s.location || '-'}</td>
+            <td>${statusBadge(s.status)}</td>
+            <td>${s.is_active ? '<span class="badge bg-success">启用</span>' : '<span class="badge bg-secondary">停用</span>'}</td>
+            <td>${s.last_sync_at || '未同步'}</td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="editStation(${s.id})"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-outline-success" onclick="syncStation(${s.id})"><i class="bi bi-arrow-repeat"></i></button>
+                    <button class="btn btn-outline-danger" onclick="deleteStation(${s.id})"><i class="bi bi-trash"></i></button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function resetStationForm() {
+    document.getElementById('stationModalTitle').textContent = '添加电站';
+    document.getElementById('stationForm').reset();
+    document.getElementById('sf-id').value = '';
+    // 填充厂家下拉
+    const sel = document.getElementById('sf-manufacturer');
+    sel.innerHTML = '<option value="">请选择厂家</option>' +
+        manufacturers.map(m => `<option value="${m.id}">${m.name} (${m.code})</option>`).join('');
+}
+
+async function editStation(id) {
+    const s = await api(`/api/stations/${id}`);
+    resetStationForm();
+    document.getElementById('stationModalTitle').textContent = '编辑电站';
+    document.getElementById('sf-id').value = s.id;
+    document.getElementById('sf-name').value = s.name;
+    document.getElementById('sf-code').value = s.station_code;
+    document.getElementById('sf-manufacturer').value = s.manufacturer_id;
+    document.getElementById('sf-capacity').value = s.capacity || '';
+    document.getElementById('sf-location').value = s.location || '';
+    document.getElementById('sf-lng').value = s.longitude || '';
+    document.getElementById('sf-lat').value = s.latitude || '';
+    new bootstrap.Modal(document.getElementById('stationModal')).show();
+}
+
+async function saveStation() {
+    const id = document.getElementById('sf-id').value;
+    const data = {
+        name: document.getElementById('sf-name').value,
+        station_code: document.getElementById('sf-code').value,
+        manufacturer_id: parseInt(document.getElementById('sf-manufacturer').value),
+        capacity: parseFloat(document.getElementById('sf-capacity').value) || null,
+        location: document.getElementById('sf-location').value || null,
+        longitude: parseFloat(document.getElementById('sf-lng').value) || null,
+        latitude: parseFloat(document.getElementById('sf-lat').value) || null,
+        contact_person: document.getElementById('sf-contact').value || null,
+        contact_phone: document.getElementById('sf-phone').value || null,
+        extra_params: document.getElementById('sf-extra').value || null,
+    };
+    if (id) {
+        await api(`/api/stations/${id}`, 'PUT', data);
+    } else {
+        await api('/api/stations', 'POST', data);
+    }
+    bootstrap.Modal.getInstance(document.getElementById('stationModal')).hide();
+    loadStations();
+}
+
+async function deleteStation(id) {
+    if (!confirm('确定删除此电站？')) return;
+    await api(`/api/stations/${id}`, 'DELETE');
+    loadStations();
+}
+</script>
+{% endblock %}
