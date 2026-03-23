@@ -1,0 +1,18 @@
+services:
+  gfdz:
+    build: .
+    container_name: gfdz
+    restart: always
+    ports:
+      - "5001:8000"
+    volumes:
+      # 挂载代码目录，修改代码后 uvicorn --reload 自动重载，无需重建容器
+      - .:/app
+      # 数据库持久化
+      - gfdz-data:/app/data
+    environment:
+      - TZ=Asia/Shanghai
+    working_dir: /app
+
+volumes:
+  gfdz-data:
