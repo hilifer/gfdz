@@ -1,0 +1,7172 @@
+文件名称Document Name：
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+总页数
+
+Rev. No.
+
+Total Pages
+
+文件发行批准页 Approval Records
+
+部门 Department
+
+姓名 Name
+
+签名 Signature
+
+日期 Date
+
+拟制 Authored By
+审批 Reviewed By
+标准化 Standardize
+批准 Approval By
+
+文件修订记录 Revision History
+版本号
+
+修改内容及理由
+
+申请人
+
+审批人
+
+生效日期
+
+Rev. No.
+
+Change Description
+
+Author
+
+Reviewed By
+
+Date
+
+V1.0
+
+初始版本
+
+周正建
+
+2017-09-26
+
+V1.1
+
+1. 增加电站当前功率
+
+周正建
+
+2018-01-04
+
+2. 删除 OLDAPI 的共用 app key 和
+secret
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+V1.2
+
+增加电站状态
+
+周正建
+
+2018-10-30
+
+V1.3
+
+新增电站列表接口和获取电站下属
+
+周正建
+
+2018-12-11
+
+设备列表接口
+V1.4
+
+增加储能电站统计数据
+
+周正建
+
+2021-07-30
+
+V1.5
+
+增加基站定位信息
+
+周正建
+
+2021-08-04
+
+V1.6
+
+增加批量获取逆变器实时数据接口
+
+周正建
+
+2022-03-01
+
+增加范围查询电站电量
+批量查询电站状态
+删除逆变器
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+1.
+
+2.
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+简介 ........................................................................................................................................................................ 5
+
+1.1
+
+目的........................................................................................................................................................ 5
+
+1.2
+
+缩写和定义............................................................................................................................................ 5
+
+1.3
+
+免责声明................................................................................................................................................ 6
+
+1.4
+
+引用........................................................................................................................................................ 6
+
+API 样例 ................................................................................................................................................................. 7
+
+2.1
+
+2.2
+
+请求........................................................................................................................................................ 7
+
+2.1.1
+
+请求地址 ........................................................................................................................................ 7
+
+2.1.2
+
+请求方法 ........................................................................................................................................ 7
+
+2.1.3
+
+请求体............................................................................................................................................ 7
+
+2.1.4
+
+请求头部 ........................................................................................................................................ 7
+
+响应...................................................................................................................................................... 10
+
+2.2.1
+
+状态码.......................................................................................................................................... 10
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+2.2.2
+
+3.
+
+响应头.......................................................................................................................................... 10
+
+API 列表 ............................................................................................................................................................... 11
+3.1
+
+getPlanListPro ..................................................................................................................................... 12
+
+3.2
+
+getPlantOverviewPro ........................................................................................................................... 16
+
+3.3
+
+getPlantOutputPro ............................................................................................................................... 19
+
+3.4
+
+getPlantEventPro ................................................................................................................................. 21
+
+3.5
+
+getDeviceListPro................................................................................................................................... 23
+
+3.6
+
+getLocationPro ..................................................................................................................................... 25
+
+3.7
+
+getLastTsDataPro ................................................................................................................................. 26
+
+3.8
+
+getInverterDataPagePro ...................................................................................................................... 31
+
+3.9
+
+getInverterETodayPro .......................................................................................................................... 36
+
+3.10
+
+getInverterHisErrorPagePro ................................................................................................................. 38
+
+3.11
+
+getInverterCurrentErrorPro ................................................................................................................. 40
+
+3.12
+
+getInverterOverviewPro....................................................................................................................... 42
+
+3.13
+
+getInverterOutputPro.......................................................................................................................... 45
+
+3.14
+
+getInverterRecoverStatusPro ............................................................................................................... 54
+
+3.15
+
+createstationPro................................................................................................................................... 56
+
+3.16
+
+getInverterDetail .................................................................................................................................. 58
+
+3.17
+
+getUserDetail ....................................................................................................................................... 62
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+4.
+
+5.
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+请求签名说明...................................................................................................................................................... 64
+
+4.1
+
+请求路径.............................................................................................................................................. 64
+
+4.2
+
+系统级 Header .................................................................................................................................... 64
+
+4.3
+
+签名校验.............................................................................................................................................. 65
+4.3.1
+
+组织参与签名计算的字符串 ...................................................................................................... 65
+
+4.3.2
+
+计算签名 ...................................................................................................................................... 67
+
+4.3.3
+
+传递签名 ...................................................................................................................................... 67
+
+4.3.4
+
+签名错误排插方法 ...................................................................................................................... 67
+
+4.3.5
+
+签名 DEMO .................................................................................................................................. 68
+
+错误代码描述表.................................................................................................................................................. 68
+5.1
+
+故障代码.............................................................................................................................................. 68
+
+5.2
+
+警告代码.............................................................................................................................................. 70
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+1. 简介
+1.1 目的
+AiSWEICloud API 支持授权获取 PV 电站的数据。您可以通过 API 从 AiSWEICloud 获取数据，并且把数据
+嵌入到您的应用或者网站上，从而定制化您的个性化演示。
+这篇文档主要讲述如何使用 AiSWEICloud API。
+
+1.2 缩写和定义
+AiSWEICloud
+
+--爱士惟 开发的用户电站监控平台。
+
+API
+
+--应用程序接口。
+
+JSON
+
+-- JavaScript 对象标记。
+
+HTTP
+
+--超文本传输协议。
+
+APP key ，APP secret – 应用密钥对，加密计算后放在请求中作为签名信息。
+Key
+key”中找到。
+
+--电站接口密钥，用来标识用户请求电站 id。可以登录电站，在”配置” ->”电站配置”->”5.API
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+1.3 免责声明
+AiSWEICloud API 是爱士惟免费提供的服务，您必须自己承担使用风险和损失。
+本文档描述的内容因为版本更新，可能和实际使用有一些不同。我们将会不定期更新文档，请随时关注
+我们的网站。如果在使用过程中遇到问题，请联系我们的客服人员。
+
+1.4 引用
+➢
+
+RFC 4627 :The application/json Media Type for JavaScript Object Notation (JSON)
+
+➢
+
+JSON-RPC 1.1 Working Draft August 2006http://json-rpc.org/wd/JSON-RPC-1-1-WD-20060807.html
+
+➢
+
+Introducing JSONhttp://www.json.org/
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+2. API 样例
+2.1 请求
+
+2.1.1
+
+请求地址
+
+http://api.general.aisweicloud.com/demo/post
+2.1.2
+
+请求方法
+
+POST
+2.1.3
+
+请求体
+
+FormParam1=FormParamValue1&FormParam2=FormParamValue2
+2.1.4
+
+请求头部
+
+➢
+
+Host: api.general.aisweicloud.com
+
+➢
+
+Date: Mon, 22 Aug 2016 11:21:04 GMT
+
+➢
+
+User-Agent : Apache-HttpClient/4.1.2 (java 1.6)
+
+➢
+
+Content-Type : application/x-www-form-urlencoded; charset=UTF-8
+//请求体类型，请根据实际请求体内容设置。
+
+➢
+
+Accept: application/json
+//请求响应体类型，部分 API 可以根据指定的响应类型来返回对应数据格式，建议手动指定此请求头，
+
+如果不设置，部分 HTTP 客户端会设置默认值 */*，导致签名错误。
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+X-Ca-Request-Mode: debug
+//是否开启 Debug 模式，大小写不敏感，不设置默认关闭，一般 API 调试阶段可以打开此设置。
+
+➢
+
+X-Ca-Version: 1
+// API 版本号，目前所有 API 仅支持版本号『1』，可以不设置此请求头，默认版本号为『1』。
+
+➢
+
+X-Ca-Signature-Headers: X-Ca-Request-Mode,X-Ca-Version,X-Ca-Stage,X-Ca-Key,X-Ca-Timestamp
+//参与签名的自定义请求头，服务端将根据此配置读取请求头进行签名，此处设置不包含 Content-Type、
+
+Accept、Content-MD5、Date 请求头，这些请求头已经包含在了基础的签名结构中，详情参照请求签名说明
+文档。
+➢
+
+X-Ca-Stage: RELEASE
+
+➢
+
+X-Ca-Key: 60022326
+//请求的 AppKey。请与我司销售人员或者售后人员联系申请。
+
+➢
+
+X-Ca-Timestamp: 1471864864235
+//请求的时间戳，值为当前时间的毫秒数，也就是从 1970 年 1 月 1 日起至今的时间转换为毫秒，时间
+
+戳有效时间为 15 分钟。
+➢
+
+X-Ca-Nonce:b931bc77-645a-4299-b24b-f3669be577ac
+//请求唯一标识，15 分钟内 AppKey+API+Nonce 不能重复，与时间戳结合使用才能起到防重放作用。
+
+➢
+
+X-Ca-Signature: FJleSrCYPGCU7dMlLTG+UD3Bc5Elh3TV3CWHtSKh1Ys=
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+//请求签名。
+➢
+
+CustomHeader: CustomHeaderValue
+//自定义请求头，此处仅作为示例，实际请求中根据 API 定义可以设置多个自定义请求头。
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+2.2 响应
+
+2.2.1
+➢
+
+状态码
+
+400
+//响应状态码，大于等于 200 小于 300 表示成功；大于等于 400 小于 500 为客户端错误；大于 500 为
+
+服务端错误。
+
+2.2.2
+➢
+
+响应头
+
+X-Ca-Request-Id: 7AD052CB-EE8B-4DFD-BBAF-EFB340E0A5AF
+//请求唯一 ID，请求一旦进入 API 网关应用后，API 网关就会生成请求 ID 并通过响应头返回给客户
+
+端，建议客户端与后端服务都记录此请求 ID，可用于问题排查与跟踪。
+➢
+
+X-Ca-Error-Message: Invalid Url
+//API 网关返回的错误消息，当请求出现错误时 API 网关会通过响应头将错误消息返回给客户。
+
+➢
+
+X-Ca-Debug-Info: {"ServiceLatency":0,"TotalLatency":2}
+//当打开 Debug 模式后会返回 Debug 信息，此信息后期可能会有变更，仅用做联调阶段参考
+您调用 API 时，使用 HTTP 协议提交请求，都需要在请求中包含签名信息。AppKey 用于标识您的身
+
+份，AppSecret 是用于加密签名字符串和服务器端验证签名字符串的密钥。详细加密签名的计算传递方式，
+请查看 4 请求签名说明。
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+API 列表
+
+3.
+编
+
+分组
+
+密钥对
+
+API 名称
+
+描述
+
+1
+
+getPlanListPro
+
+分页获取用户所有电站信息
+
+2
+
+getPlantOverviewPro
+
+获取电站发电量及效益减排数据
+
+3
+
+getPlantOutputPro
+
+按照查询类型获取电站下所有逆变器(某
+
+号
+
+天、月、年)数据
+4
+
+getPlantEventPro
+
+获取电站事件信息
+
+5
+
+getDeviceListPro
+
+获取电站下全部设备的列表
+
+6
+
+getLocationPro
+
+获取采集器位置信息
+
+getLastTsDataPro
+
+获取逆变器最新记录
+
+getInverterDataPagePro
+
+分页获取电站下所有逆变器在某时段内
+
+7
+8
+
+OLDAPI
+
+请与销售和
+售后人员联
+系申请。
+
+数据
+
+9
+
+getInverterETodayPro
+
+获取逆变器某天发电量
+
+10
+
+getInverterHisErrorPagePro
+
+分页获取逆变器历史故障信息
+
+11
+
+getInverterCurrentErrorPro
+
+获取电站下逆变器当前故障信息
+
+12
+
+getInverterOverviewPro
+
+获取逆变器发电量及效益减排数据
+
+13
+
+getInverterOutputPro
+
+按照查询类型获取逆变器(某天、月、年)
+数据
+
+14
+AiSWEI New Energy Co., Ltd
+
+getInverterRecoverStatusPro
+
+根据故障唯一标识获取逆变器恢复状态
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+信息
+15
+
+createstationPro
+
+创建电站(绑定单个采集器)
+
+16
+
+getInverterDetail
+
+获取逆变器基础信息
+
+17
+
+getUserDetail
+
+获取用户(电站)基础信息
+
+18
+➢
+
+流量控制：
+1） OLDAPI： 100 次/分钟
+
+3.1 getPlanListPro
+➢
+
+请求路径 : https://api.general.aisweicloud.com/pro/getPlanListPro
+
+➢
+
+请求方式: GET
+
+➢
+
+请求参数:
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+order
+
+Integer
+
+0: order by ludt 1: order by createTime 2: order by
+status
+
+Y
+
+status
+
+Integer
+
+0-离线 1-正常 2-警告 3-错误 4-部分离线
+
+N
+
+pageNum
+
+Integer
+
+页码
+
+Y
+
+pageSize
+
+Integer
+
+每页大小
+
+Y
+
+➢
+
+响应数据格式:JSON
+
+➢
+
+响应数据参数:
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+Info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+
+返回数据
+
+totalPages
+
+Integer
+
+总页数
+
+totalElements
+
+Integer
+
+元素个数
+
+pageNum
+
+Integer
+
+当前页码
+
+pageSize
+
+Integer
+
+每页大小
+
+AiSWEI New Energy Co., Ltd
+
+备注
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+result
+
+Json
+
+wd
+
+double
+纬度
+
+country
+
+Integer
+国家代码
+
+totalpower
+
+1kwp
+
+float
+装机容量
+
+apikey
+
+String
+电站key
+
+city
+
+String
+城市
+
+ludt
+
+String
+最后更新时间
+
+etoday
+
+1kwh
+
+float
+日发电量
+
+createdt
+
+String
+创建时间
+
+jd
+
+double
+经度
+
+etotal
+
+1kwh
+
+float
+总发电量
+
+imgurl
+
+String
+背景图片
+
+province
+
+Integer
+州和省代码
+
+name
+
+String
+
+status
+
+Integer
+
+position
+
+String
+
+电站名称
+电站状态
+0-离线 1-正常 2-警告 3-错误 4-部分离线
+地址
+
+accountName
+
+String
+用户手机或邮箱
+
+➢
+
+响应样例
+{
+"status": 200,
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"info": "success",
+"time": "2022-05-16 14:39:25",
+"data": {
+"totalPages": 24,
+"totalElements": 24,
+"pageNum": 1,
+"pageSize": 1,
+"result": [
+{
+"country": 86,
+"totalpower": 21.15,
+"apikey": "be9ca0323e4149758d0b02ea3310cxxx",
+"city": "",
+"accountName": "187xxxxxxxx",
+"ludt": "2022-05-16 14:35:08",
+"etoday": 101.2,
+"createdt": "2022-05-13 21:34:10",
+"wd": 34.174373,
+"etotal": 302.9,
+"imgurl": "https://www.zevercloud.com/upload/station/defultBg.jpg",
+"province": 26,
+"name": "兴平XYZL ",
+"jd": 108.40205,
+"position": "中国陕西省西安市周至县老大路",
+"status": 1
+}
+]
+}
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+3.2 getPlantOverviewPro
+➢
+
+请求路径： https://api.general.aisweicloud.com/pro/getPlantOverviewPro
+
+➢
+
+请求方式: GET
+
+➢
+
+请求参数:
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+apikey
+
+String
+
+电站key
+
+Y
+
+token
+
+String
+
+用户token
+
+Y
+
+➢
+
+响应数据格式:JSON
+
+➢
+
+响应数据参数:
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+
+ludt
+
+String
+
+最后更新时间
+
+apikey
+
+String
+
+电站key
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+status
+
+String
+
+E-Month
+
+Json
+
+电站状态
+0:下线;1:在线;2:警告;3:故障; 4-部分离线
+月发电量
+
+unit
+
+String
+
+单位
+
+value
+
+float
+
+值
+
+CO2Avoided
+
+Json
+
+二氧化碳减排
+
+E-Today
+
+Json
+
+日发电量
+
+TotalYield
+
+Json
+
+总收益
+
+E-Total
+
+Json
+
+总发电量
+
+E-Year
+
+Json
+
+年发电量
+
+Power
+
+Json
+
+功率
+
+响应样例:
+{
+"status": 200,
+"info": "success",
+"time": "2022-05-09 15:28:22",
+"data": {
+"E-Month": {
+"unit": "KWh",
+"value": 42.1
+},
+"CO2Avoided": {
+"unit": "Kg",
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"value": 6.0
+},
+"E-Today": {
+"unit": "KWh",
+"value": 3.6
+},
+"TotalYield": {
+"unit": "",
+"value": 3.2
+},
+"E-Total": {
+"unit": "KWh",
+"value": 180.6
+},
+"E-Year": {
+"unit": "KWh",
+"value": 201.0
+},
+"ludt": "2022-04-09 14:22:53",
+"Power": {
+"unit": "W",
+"value": 42.0
+},
+"apikey": "sada34",
+"status": "1"
+}
+}
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+3.3 getPlantOutputPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getPlantOutputPro
+
+➢
+
+请求方式: GET
+
+➢
+
+请求参数:
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+apikey
+
+String
+
+电站key
+
+Y
+
+period
+
+String
+
+类型: bydays、bymonth、byyear、bytotal
+
+Y
+
+date
+
+String
+
+N
+
+token
+
+String
+
+时间格式
+bydays yyyy-MM-dd
+bymonth yyyy-MM
+byyear yyyy
+bytotal date 不填
+用户token
+
+➢
+
+响应数据格式:JSON
+
+➢
+
+响应数据参数:
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+AiSWEI New Energy Co., Ltd
+
+Y
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+data
+
+➢
+
+Json
+
+apikey
+
+String
+
+电站key
+
+dataunit
+
+String
+
+单位
+
+result
+
+Json
+
+结果集
+
+no
+
+String
+
+序号
+
+time
+
+String
+
+时间
+
+value
+
+String
+
+值
+
+响应样例:
+
+{
+"status": 200,
+"info": "success",
+"time": "2022-05-09 15:28:32",
+"data": {
+"result": [
+{
+"no": "1",
+"time": "2022",
+"value": "4.0"
+}
+],
+"apikey": "asd124325",
+"dataunit": "KWh"
+}
+}
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+3.4 getPlantEventPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getPlantEventPro
+
+➢
+
+请求方式: GET
+
+➢
+
+请求参数:
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+apikey
+
+String
+
+电站key
+
+Y
+
+token
+
+String
+
+用户token
+
+Y
+
+sdt
+
+String
+
+开始时间 格式：yyyy-MM-dd
+
+Y
+
+edt
+
+String
+
+结束时间 格式：yyyy-MM-dd
+
+Y
+
+➢
+
+响应数据格式:JSON
+
+➢
+
+响应数据参数:
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+apikey
+
+String
+
+电站key
+
+result
+
+List
+
+结果集
+
+eventCode
+
+String
+
+错误码
+
+eventTime
+
+String
+
+错误时间
+
+eventType
+
+String
+
+错误类型 1-消息
+
+ssno
+
+String
+
+逆变器编号
+
+2-警告
+
+响应样例
+{
+"status": 200,
+"info": "success",
+"time": "2022-05-09 15:28:37",
+"data": {
+"result": [
+{
+"eventCode": "304",
+"ssno": "SX00040311440018",
+"eventTime": "2022-05-01 13:45:11",
+"eventType": "3"
+}
+],
+"apikey": "asd45642"
+}
+}
+
+AiSWEI New Energy Co., Ltd
+
+3-错误
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+3.5 getDeviceListPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getDeviceListPro
+
+➢
+
+请求方式:GET
+
+➢
+
+请求参数:
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+apikey
+
+String
+
+电站key a1,a2,a3
+
+Y
+
+token
+
+String
+
+用户token
+
+Y
+
+➢
+
+响应数据格式：JSON (application/json;charset=utf-8)
+
+➢
+
+响应数据参数
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+
+psn
+
+AiSWEI New Energy Co., Ltd
+
+String
+
+采集器序列号
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+pstate
+
+➢
+
+inverters
+
+List
+
+采集器状态
+0-离线 1-在线
+逆变器集合
+
+isn
+
+String
+
+逆变器序列号
+
+ludt
+
+String
+
+数据时间
+
+istate
+
+Integer
+
+逆变器状态
+0-离线 1-在线
+
+Integer
+
+9-未激活
+
+2-缓存
+
+响应示例
+{
+"status": 200,
+"info": "success",
+"time": "2022-05-09 15:28:40",
+"data": [
+{
+"pstate": 0,
+"inverters": [
+{
+"isn": "5.0NX12000010",
+"ludt": "2022-05-09 15:02:03",
+"istate": 0
+}
+],
+"psn": "B3200A2305D7"
+}
+]
+}
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+3.6 getLocationPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getLocationPro
+
+➢
+
+请求方式:GET
+
+➢
+
+请求参数:
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+psno
+
+String
+
+采集器序列号
+
+Y
+
+➢
+
+响应数据格式：JSON (application/json;charset=utf-8)
+
+➢
+
+响应数据参数
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Jsno
+
+address
+
+String
+
+地址
+
+jd
+
+String
+
+经度
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+wd
+
+➢
+
+String
+
+纬度
+
+响应样例
+{
+"status": 200,
+"info": "success",
+"time": "2022-05-09 15:28:44",
+"data": {
+"address": "中国江苏省镇江市扬中市港兴路辅路长乐村北272米",
+"jd": "119.861289",
+"wd": "32.201583"
+}
+}
+
+3.7 getLastTsDataPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getLastTsDataPro
+
+➢
+
+请求方式:GET
+
+➢
+
+请求参数
+字段
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+isnos
+
+String
+
+逆变器序列号
+
+flag
+
+Integer
+
+111,222
+
+➢
+
+0-查询设备在线时最新一条记录
+1-查询设备上报的最后一条记录
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+
+AiSWEI New Energy Co., Ltd
+
+Y
+默认：0
+
+N
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+
+sn
+
+String
+
+备注
+
+逆变器序列号
+tmstp
+
+String
+时间戳
+
+apikey
+
+String
+电站key
+
+tim
+
+String
+更新时间
+
+pac
+
+1W
+
+String
+有功功率
+
+prc
+
+1Var
+
+String
+无功功率
+
+sac
+
+1VA
+
+String
+视在功率
+
+pf
+
+0.01
+
+String
+功率因数
+
+etd
+
+0.1kwh
+
+String
+日发电量
+
+eto
+
+0.1kwh
+
+String
+总发电量
+
+hto
+
+1H
+
+String
+并网持续时间
+
+cf
+
+String
+散热器温度
+
+tu
+
+0.1℃
+0.1℃
+
+String
+U相温度
+
+tv
+
+0.1℃
+
+String
+V相温度
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+tw
+
+0.1℃
+
+String
+W相温度
+
+cb
+
+0.1℃
+
+String
+boost温度
+
+bv
+
+0.1V
+
+String
+bus电压
+
+er
+
+String
+错误
+
+wn0
+
+String
+
+警告
+
+v1~3
+
+String
+
+MPPT电压
+
+i1~3
+
+String
+
+MPPT电流
+
+s1~3
+
+String
+
+串电流
+
+va1~3
+
+String
+
+交流电压
+
+ia1~3
+
+String
+
+交流电流
+
+fac
+
+String
+
+频率
+
+powerRatio
+
+String
+
+输出功率比
+
+stu
+
+String
+
+逆变器状态 0-等待; 1-正常;
+
+0.1V
+0.01A
+0.1A
+0.1V
+0.1A
+0.01Hz
+
+2-故障; 4-检测; 99-停机
+bat0
+
+Integer
+
+PV 总功率
+
+bat1
+
+Integer
+
+PV 日发电量
+
+0.1kWh
+
+bat2
+
+Integer
+
+PV 总发电量
+
+0.1kWh
+
+bat3
+
+Integer
+
+电池状态
+
+bat4
+
+Integer
+
+电池错误状态
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+bat5
+
+Integer
+
+电池警告状态
+
+bat6
+
+Integer
+
+电池电压
+
+0.01V
+
+bat7
+
+Integer
+
+电池电流
+
+0.1A
+
+bat8
+
+Integer
+
+电池功率
+
+bat9
+
+Integer
+
+电池温度
+
+0.1℃
+
+bat10
+
+Integer
+
+电池 SOC
+
+0.01
+
+bat11
+
+Integer
+
+电池 SOH
+
+0.01
+
+bat12
+
+Integer
+
+电池今日充电
+
+0.1kWh
+
+bat13
+
+Integer
+
+电池今日放电
+
+0.1kWh
+
+bat14
+
+Integer
+
+电池通讯状态
+
+bat15
+
+Integer
+
+电池充电限流值
+
+0.1A
+
+bat16
+
+Integer
+
+电池放电限流值
+
+0.1A
+
+bat17
+
+Integer
+
+AC 侧今日充电量
+
+0.1kWh
+
+bat18
+
+Integer
+
+AC 侧今日放电量
+
+0.1kWh
+
+返回样例
+{
+"status": 200,
+"info": "success",
+"time": "2022-05-10 19:43:22",
+"data": [
+{
+"sn": "SZ001786221B0635",
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"tmstp": "1652182736000",
+"apikey": "145371",
+"tim": "2022-05-10 19:38:56",
+"pac": "0",
+"prc": "0",
+"sac": "0",
+"pf": "0",
+"etd": "456",
+"eto": "88273",
+"hto": "1439",
+"cf": "278",
+"tu": "232",
+"tv": "232",
+"tw": "232",
+"cb": "232",
+"bv": "5850",
+"er": "0",
+"wn0": "0",
+"v1": "1501",
+"v2": "3527",
+"v3": null,
+"v4": null,
+"v5": null,
+"i1": "0",
+"i2": "11",
+"i3": null,
+"i4": null,
+"i5": null,
+"s1": null,
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"s2": null,
+"s3": null,
+"s4": null,
+"s5": null,
+"s6": null,
+"s7": null,
+"s8": null,
+"s9": null,
+"s10": null,
+"va1": "2314",
+"va2": "2361",
+"va3": "2348",
+"ia1": "10",
+"ia2": "9",
+"ia3": "8",
+"fac": "4996",
+"powerRatio": "0.44",
+"stu": "1"
+}
+]
+}
+
+3.8 getInverterDataPagePro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterDataPagePro
+请求方式:GET
+
+➢
+
+请求参数
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+apikey
+
+String
+
+电站key
+
+N
+
+isnos
+
+String
+
+逆变器序列号
+Eg 111,222
+
+N
+
+startDate
+
+String
+
+开始时间
+yyyy-MM-dd HH:mm:ss
+
+Y
+
+endDate
+
+String
+
+结束时间
+yyyy-MM-dd HH:mm:ss
+
+Y
+
+flag
+
+Integer
+
+pageNum
+
+Integer
+
+0-查询逆变器绑定电站后发电数据
+1-查询逆变器绑定电站前发电数据
+当前页码
+
+pageSize
+
+Integer
+
+每页大小
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+
+totalPages
+totalElements
+pageNum
+
+Integer
+
+总页数
+
+Integer
+
+元素总个数
+
+Integer
+
+当前页数
+
+AiSWEI New Energy Co., Ltd
+
+默认0
+
+N
+Y
+Y
+
+备注
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+Integer
+
+每页大小
+
+List
+
+结果
+
+apikey
+
+String
+
+电站key
+
+isno
+
+String
+
+逆变器序列号
+
+pageSize
+result
+
+dataList
+tu
+
+List
+String
+
+0.1℃
+U 相温度
+
+tv
+
+String
+
+V 相温度
+
+tmstp
+
+String
+
+时间戳
+
+tw
+
+String
+
+W 相温度
+
+String
+
+入库时间
+
+String
+
+频率
+
+psn
+
+String
+
+采集器序列号
+
+pac
+
+String
+
+输出功率
+
+1W
+
+bv
+
+String
+
+Bus 电压
+
+0.1V
+
+etd
+
+String
+
+日发电量
+
+0.1kwh
+
+sac
+
+String
+
+视在功率
+
+1W
+
+String
+
+采样频率
+
+String
+
+交流电流
+
+String
+
+时间
+
+insdt
+fac
+
+smp
+ia1~3
+tim
+
+AiSWEI New Energy Co., Ltd
+
+0.1℃
+
+0.1℃
+
+0.01Hz
+
+0.1A
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+sn
+
+String
+
+逆变器序列号
+
+cb
+
+String
+
+Boost 温度
+
+0.1℃
+
+prc
+
+String
+
+无功功率
+
+1W
+
+eto
+
+String
+
+总发电量
+
+0.1kwh
+
+hto
+
+String
+
+总发电时长
+
+1H
+
+cf
+
+String
+
+散热片温度
+
+0.1℃
+
+String
+
+交流电压
+
+0.1V
+
+String
+
+MPPT 电流
+
+0.01A
+
+va1~3
+i1~3
+itv
+
+入网分钟数
+
+er
+
+String
+
+错误代码
+
+pf
+
+String
+
+功率因数
+
+0.01
+
+String
+
+MPPT 电压
+
+0.1V
+
+String
+
+警告代码
+
+String
+
+组串电流
+
+v1~3
+wn0
+s1~6
+➢
+
+String
+
+Response Example
+{
+"status": 200,
+"info": "success",
+"time": "2022-06-20 15:14:16",
+"data": {
+"totalPages": 1,
+"totalElements": 1,
+
+AiSWEI New Energy Co., Ltd
+
+0.1A
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"pageNum": 1,
+"pageSize": 3,
+"result": [
+{
+"apikey": "a25a6c9b9f3045e9b4105d1c5bd1fc8b",
+"dataList": [
+{
+"tu": "294",
+"tv": "294",
+"tmstp": "1655242295000",
+"tw": "294",
+"insdt": "2022-06-15 05:31:37",
+"fac": "4998",
+"psn": "xx00A230xx",
+"pac": "1251",
+"bv": "6029",
+"etd": "4",
+"sac": "227",
+"smp": "5",
+"ia1": "26",
+"tim": "2022-06-15 05:31:35",
+"ia3": "28",
+"sn": " xxx4000122300xx ",
+"ia2": "26",
+"s1": "0",
+"cb": "297",
+"s2": "11",
+"prc": "0",
+"s3": "0",
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"eto": "101576",
+"s4": "0",
+"hto": "674",
+"s5": "0",
+"cf": "273",
+"s6": "0",
+"va2": "2213",
+"va1": "2221",
+"i1": "185",
+"i2": "145",
+"va3": "2218",
+"i3": "100",
+"itv": "331",
+"er": "0",
+"pf": "100",
+"wn0": "0",
+"v1": "4203",
+"v2": "4286",
+"v3": "4190"
+}
+],
+"isno": "xxx4000122300xx"
+}
+]
+}
+}
+3.9 getInverterETodayPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterETodayPro
+请求方式:GET
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+apikey
+
+String
+
+电站key
+
+Y
+
+isnos
+
+String
+
+逆变器序列号
+Eg 111,222
+
+N
+
+date
+
+String
+
+时间 格式 yyyy-MM-dd
+
+Y
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+
+➢
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+date
+
+String
+
+数据时间
+
+result
+
+List
+
+结果
+
+Response Example
+{
+"status": 200,
+"info": "success",
+"time": "2022-06-20 17:04:30",
+"data": {
+
+AiSWEI New Energy Co., Ltd
+
+单位: kwh
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"date": "2022-06-19",
+"result": [
+{
+"SP00250022240383": 145.3
+}
+]
+}
+}
+3.10 getInverterHisErrorPagePro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterHisErrorPagePro
+请求方式:GET
+
+➢
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+apikey
+
+String
+
+电站key
+
+Y
+
+isno
+
+String
+
+逆变器序列号
+
+N
+
+startDate
+
+String
+
+开始时间 格式 yyyy-MM-dd HH:mm:ss
+
+Y
+
+endDate
+
+String
+
+结束时间 格式 yyyy-MM-dd HH:mm:ss
+
+Y
+
+errorType
+
+Integer
+
+errorType
+
+N
+
+pageNum
+
+Integer
+
+当前页码
+
+Y
+
+pageSize
+
+Integer
+
+每页大小
+
+Y
+
+2-warn 3-error
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+totalPages
+
+Integer
+
+总页数
+
+totalElements
+
+Integer
+
+元素总个数
+
+pageNum
+
+Integer
+
+当前页码
+
+pageSize
+
+Integer
+
+每页大小
+
+result
+
+List
+
+结果
+
+errorDate
+
+long
+
+错误时间
+
+errorCode
+
+int
+
+错误代码
+
+errorType
+
+int
+
+错误类型
+
+context
+
+String
+
+描述
+
+isno
+
+String
+
+逆变器序列号
+
+Response Example
+{
+"status": 200,
+"info": "success",
+"time": "2022-06-21 11:06:27",
+"data": {
+
+AiSWEI New Energy Co., Ltd
+
+3-错误
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"totalPages": 1,
+"totalElements": 1,
+"pageNum": 1,
+"pageSize": 1,
+"result": [
+{
+"errorDate": 1655326167000,
+"errorCode": 35,
+"errorType": 3,
+"context": "35 - 电网丢失",
+"isno": "AR8000011219xxx"
+}
+]
+}
+}
+3.11 getInverterCurrentErrorPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterCurrentErrorPro
+请求方式:GET
+
+➢
+
+➢
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+token
+
+Y
+
+apikey
+
+String
+
+The api key(NMI) of your plants
+
+N
+
+isno
+
+String
+
+Inverter SN
+
+N
+
+errorType
+
+Integer
+
+errorType
+
+2-warn 3-error
+
+返回类型: JSON (application/json;charset=utf-8)
+
+AiSWEI New Energy Co., Ltd
+
+N
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Json
+
+errorDate
+
+long
+
+错误时间
+
+errorCode
+
+int
+
+错误码
+
+errorType
+
+int
+
+错误类型
+
+context
+
+String
+
+描述
+
+isno
+
+String
+
+逆变器序列号
+
+apikey
+
+String
+
+电站key
+
+faultCode
+
+String
+
+唯一标识
+
+➢
+
+Response Example
+
+➢
+
+响应样例:
+{
+"status": 200,
+"info": "success",
+"time": "2022-06-21 11:16:55",
+"data": [
+
+AiSWEI New Energy Co., Ltd
+
+3-错误
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+{
+"context": "35 - 电网丢失",
+"errorCode": 35,
+"errorType": 3,
+"faultCode ": "xxx001xxx",
+"isno": "AR8000011219xxxx",
+"apikey": "xxxxxxxxx",
+"errorDate": 1655758207000
+}
+]
+}
+3.12 getInverterOverviewPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterOverviewPro
+
+➢
+
+请求方式:GET
+
+➢
+
+请求参数
+
+➢
+
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+apikey
+
+String
+
+电站key
+
+Y
+
+date
+
+String
+
+时间 格式 yyyy-MM
+
+N
+
+返回类型: JSON (application/json;charset=utf-8)
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Jsno
+apikey
+
+String
+
+result
+
+List
+
+电站 key
+
+isno
+
+String
+
+逆变器序列号
+
+e_today
+
+String
+
+日发电量
+
+1Kwh
+
+e_month
+
+String
+
+月发电量
+
+1kwh
+
+e_total
+
+String
+
+总发电量
+
+1kwh
+
+co2
+
+double
+
+二氧化碳减排
+
+yield
+
+double
+
+收益
+
+String
+
+数据时间
+
+recvdate
+➢
+
+备注
+
+响应样例
+{
+"status": 200,
+"info": "success",
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"time": "2022-06-21 16:38:04",
+"data": [
+{
+"apikey": "xxx2bec7dfd4da69ef07b3783e43xxx",
+"result": [
+{
+"isno": "SP00200022252664",
+"e_today": "117.60",
+"e_month": "127.600",
+"e_total": "407.90",
+"co2": 326.32,
+"yield": 163.16,
+"recvdate": "2022-06-21 16:33:13.0"
+}
+]
+}
+]
+}
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+3.13 getInverterOutputPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterOutputPro
+
+➢
+
+请求方式:GET
+
+➢
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+apikey
+
+String
+
+电站key
+
+N
+
+isnos
+
+String
+
+逆变器编号, 单次最多100个逆变器
+
+N
+
+date
+
+String
+
+N
+
+period
+
+String
+
+时间格式 根据period类型取值
+bydays
+yyyy-MM-dd
+bymonth yyyy-MM
+byyear
+yyyy
+bytotal
+不填
+类型: bydays、bymonth、byyear、bytotal
+
+pageNum
+
+Integer
+
+当前页码
+
+Y
+
+pageSize
+
+Integer
+
+每页大小
+
+单次最多查询100条记录
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+AiSWEI New Energy Co., Ltd
+
+Y
+
+Y
+
+备注
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+data
+
+Integer
+
+总页数
+
+Integer
+
+元素总个数
+
+Integer
+
+当前页数
+
+Integer
+
+每页大小
+
+String
+
+电站key
+
+isno
+
+String
+
+逆变器编号
+
+dataunit
+
+String
+
+单位
+
+data
+
+Json
+
+结果集
+
+no
+
+String
+
+序号
+
+time
+
+String
+
+时间
+
+value
+
+String
+
+值
+
+totalPages
+totalElements
+pageNum
+pageSize
+apikey
+
+➢
+
+data
+
+Json
+
+响应样例
+--bytoday
+{
+"data": {
+"result": [
+{
+"apikey": "1a8100f3a95d47xxxxxxxxx",
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"data": [
+{
+"no": "0",
+"time": "00:00",
+"value": "0.00"
+},
+{
+"no": "1",
+"time": "00:20",
+"value": "0.00"
+},
+......
+{
+"no": "71",
+"time": "23:40",
+"value": "0.00"
+}
+],
+"isno": "SZ00250xxxxxxxx",
+"dataunit": "KW"
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+}
+],
+"totalPages": 3,
+"pageSize": 1,
+"pageNum": 1,
+"totalElements": 3
+},
+"time": "2023-05-22 16:59:56",
+"status": 200,
+"info": "success"
+}
+
+-- bymonth
+{
+"data": {
+"result": [
+{
+"apikey": "1a8100f3a95d474xxxxxxxxx",
+"data": [
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+{
+"no": "1",
+"time": "2023-05-01",
+"value": "164.2"
+},
+{
+"no": "2",
+"time": "2023-05-02",
+"value": "149.7"
+},
+......
+{
+"no": "31",
+"time": "2023-05-31",
+"value": "0.0"
+}
+],
+"isno": "SZ00250xxxxxxx",
+"dataunit": "KWh"
+}
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+],
+"totalPages": 3,
+"pageSize": 1,
+"pageNum": 1,
+"totalElements": 3
+},
+"time": "2023-05-22 16:58:05",
+"status": 200,
+"info": "success"
+}
+
+-- byyear
+{
+"data": {
+"result": [
+{
+"apikey": "1a8100f3a95d47xxxxxxx",
+"data": [
+{
+"no": "1",
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"time": "2023-01",
+"value": "2634.3"
+},
+{
+"no": "2",
+"time": "2023-02",
+"value": "2170.0"
+},
+......
+{
+"no": "12",
+"time": "2023-12",
+"value": "0.0"
+}
+],
+"isno": "SZ00250xxxxxxx",
+"dataunit": "KWh"
+}
+],
+"totalPages": 3,
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"pageSize": 1,
+"pageNum": 1,
+"totalElements": 3
+},
+"time": "2023-05-22 17:00:34",
+"status": 200,
+"info": "success"
+}
+
+--bytotal
+{
+"data": {
+"result": [
+{
+"apikey": "1a8100f3a95d4xxxxxxxx",
+"data": [
+{
+"no": "1",
+"time": "2021",
+"value": "1.54"
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+},
+{
+"no": "2",
+"time": "2022",
+"value": "39.343"
+},
+{
+"no": "3",
+"time": "2023",
+"value": "14.646"
+}
+],
+"isno": "SZ00250xxxxx",
+"dataunit": "MWh"
+}
+],
+"totalPages": 3,
+"pageSize": 1,
+"pageNum": 1,
+"totalElements": 3
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+},
+"time": "2023-05-22 17:01:12",
+"status": 200,
+"info": "success"
+}
+
+3.14 getInverterRecoverStatusPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterRecoverStatusPro
+请求方式:GET
+
+➢
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户token
+
+Y
+
+faultCodes
+
+String
+
+唯一标识码 Eg
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Jsno
+
+AiSWEI New Energy Co., Ltd
+
+111,222,333
+
+Y
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+recoverTime
+
+long
+
+恢复时间
+
+recover
+
+int
+
+恢复状态
+
+faultCode
+
+String
+
+唯一标识码
+
+0-未恢复
+
+1- 已恢复
+
+响应样例:
+{
+"status": 200,
+"info": "success",
+"time": "2022-06-24 16:56:36",
+"data": [
+{
+"recoverTime": 1656043923000,
+"recover": 1,
+"faultCode": "Q0gwMDUwMDAxMjI1MDA5MnwzNHwxNjU2MDQzNzMzMDAw"
+},
+{
+"recoverTime": null,
+"recover": 0,
+"faultCode": "U1AwMDIzMDAyMjI1MDQwM3wzNXwxNjU1NzU4MDkwMDAw"
+}
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+]
+}
+
+3.15 createstationPro
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/createstationPro
+请求方式:POST
+
+➢
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户永久性toke
+
+Y
+
+psno
+
+String
+
+采集器序列号
+
+Y
+
+registno
+
+String
+
+采集器注册码
+
+Y
+
+name
+
+String
+
+电站名称
+
+Y
+
+totalpower
+
+Double
+
+电站装机容量，默认0KW
+
+N
+
+area
+
+String
+
+电站类型：1户用电站，2商用电站
+
+N
+
+timezone
+
+Long
+
+时区. 中国默认8
+
+N
+
+wkey
+
+Long
+
+时区编码，中国时区编码7800
+
+N
+
+customerflag
+
+Long
+
+夏令时标记位. 0 不实行夏令时; 1 实行夏令时。默认0
+
+N
+
+co2xs
+
+Long
+
+二氧化碳减排系数. 默认0.7
+
+N
+
+gainxs
+
+Long
+
+收益计算系数. 默认0.8
+
+N
+
+country
+
+Long
+
+国家代码. 默认中国86
+
+N
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+province
+
+Long
+
+州省代码.默认0 附录二
+
+N
+
+city
+
+String
+
+城市
+
+N
+
+jd
+
+Double
+
+电站所在地区经度. default 0.
+
+N
+
+wd
+
+Double
+
+电站所在地区纬度. default 0.
+
+N
+
+street
+
+String
+
+地址
+
+N
+
+orgCode
+
+String
+
+组织编码
+
+N
+
+gridType
+
+Integer
+
+并网类型 1:余额上网;2:自发自用余电上网;3:离网模式
+
+N
+
+investType
+
+Integer
+
+出资方式 1:业主全款;2:业主贷款;3:自投;4:与业主合资
+
+N
+
+buyxs
+
+Double
+
+买电系数 默认 1
+
+N
+
+note1
+
+String
+
+备注1
+
+N
+
+note2
+
+String
+
+备注2
+
+N
+
+note3
+
+String
+
+备注3
+
+N
+
+locale
+
+String
+
+语言种类. 默认中文zh_CN
+
+N
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+time
+
+String
+
+data
+
+Jsno
+
+apikey
+
+String
+
+时间
+
+电站 key
+
+响应样例:
+{
+"status" : 200,
+"info" : "成功",
+"time" : "2022-08-05 16:21:50",
+"data" : {
+"apikey":"XXXX"
+}
+}
+
+3.16 getInverterDetail
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getInverterDetail
+请求方式:GET
+
+➢
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户永久性token
+
+Y
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+apikeys
+
+String
+
+电站key
+
+111,222,333
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Jsno
+apikey
+
+Y
+
+备注
+
+String
+
+电站 key
+
+String
+
+电站名称
+
+String
+
+逆变器编号
+
+eToday
+
+BigDecimal
+
+日发电量
+
+1kwh
+
+pac
+
+BigDecimal
+
+当前功率
+
+1w
+
+maxoutputpower
+
+BigDecimal
+
+最大输出功率
+
+1w
+
+hTotal
+
+BigDecimal
+
+并网时长
+
+1H
+
+insdt
+
+String
+
+并网时间
+
+model
+
+String
+
+型号
+
+factoryName
+
+String
+
+厂家名称
+
+stationName
+isno
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+safetyver
+
+String
+
+安规版本
+
+softver
+
+String
+
+软件版本
+
+jd
+
+String
+
+经度
+
+wd
+
+String
+
+纬度
+
+street
+
+String
+
+地址
+
+region
+
+String
+
+县(区)
+
+city
+
+String
+
+城市
+
+province
+
+String
+
+省份
+
+userName
+
+String
+
+用户名称
+
+telno
+
+String
+
+电话
+
+status
+
+Integer
+
+状态
+
+响应样例:
+{
+"data":[
+{
+"maxoutputpower":25000.00,
+"apikey":"xxxasadfafgaxxxx",
+"factoryName":"AISWEI",
+"wd":"36.9844440000",
+
+AiSWEI New Energy Co., Ltd
+
+0-正常
+
+1-故障
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"safetyver":"V610-11006-02",
+"eToday":60.30,
+"softver":"V610-03040-05",
+"pac":2729.00,
+"street":"山东省德州市禹城市市中街道 XXXX",
+"region":"xxxx",
+"city":"xxxxx",
+"province":"xxxx",
+"hTotal":2923.00,
+"insdt":"2022-05-10 19:38:56",
+"isno":"XXXX",
+"model":"ASW25K-LT-G2",
+"jd":"116.6911770000",
+"status":0
+}
+],
+"time":"2022-12-21 15:55:37",
+"status":200,
+"info":"success"
+}
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+3.17 getUserDetail
+➢
+
+请求路径: https://api.general.aisweicloud.com/pro/getUserDetail
+请求方式:GET
+
+➢
+
+请求参数
+名称
+
+类型
+
+描述
+
+是否必填
+
+token
+
+String
+
+用户永久性token
+
+Y
+
+apikeys
+
+String
+
+电站key
+
+Y
+
+111,222,333
+
+➢
+
+返回类型: JSON (application/json;charset=utf-8)
+
+➢
+
+返回参数
+名称
+
+类型
+
+描述
+
+status
+
+Integer
+
+返回码
+
+info
+
+String
+
+描述
+
+time
+
+String
+
+时间
+
+data
+
+Jsno
+apikey
+
+String
+
+电站 key
+
+plant_name
+
+String
+
+电站名称
+
+capacity
+
+BigDecimal
+
+装机容量
+
+addr
+
+String
+
+地址
+
+AiSWEI New Energy Co., Ltd
+
+备注
+
+1kwp
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+loan_status
+
+Integer
+
+申请状态 1-申请 2-提货
+
+String
+
+并网时间
+
+String
+
+用户名称
+
+applyTime
+
+String
+
+申请时间
+
+telno
+
+String
+
+电话
+
+region
+
+String
+
+县(区)
+
+city
+
+String
+
+城市
+
+province
+
+String
+
+省份
+
+user_grid_connection
+user_name
+
+➢
+
+响应样例:
+{
+"data": [
+{
+"loan_status": 3,
+"apikey": "xxxxaas",
+"user_name": "",
+"user_grid_connection": "2023-01-15 14:47:31",
+"addr": "广东省河",
+"telno": "",
+"plant_name": "jhdsa-xxx",
+
+AiSWEI New Energy Co., Ltd
+
+3-并网
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+"capacity": 19.25
+}
+],
+"time": "2023-02-07 15:34:47",
+"status": 200,
+"info": "success"
+}
+
+4. 请求签名说明
+4.1 请求路径
+每个 API 服务都属于一个 API 分组，每个 API 分组有不同的域名。域名是由服务端绑定的独立域名，API 网关通过域
+名来寻址定位 API 分组。
+域名的格式为 www.[独立域名].com/[Path]?[HTTPMethod]。
+API 网关通过域名定位到一个唯一的分组，通过 Path+HTTPMethod 确定该分组下唯一的 API。
+
+4.2 系统级 Header
+【必选】X-Ca-Key：AppKey。
+【必选】X-Ca-Signature：签名字符串。
+【可选】X-Ca-Timestamp：API 调用者传递时间戳，值为当前时间的毫秒数，也就是从 1970 年 1 月 1 日起至今的时
+间转换为毫秒，时间戳有效时间为 15 分钟。
+【可选】X-Ca-Nonce：API 调用者生成的 UUID，结合时间戳防重放。
+【可选】Content-MD5 当请求 Body 非 Form 表单时，可以计算 Body 的 MD5 值传递给云网关进行 Body MD5
+校验。
+【可选】X-Ca-Stage 请求 API 所属 Stage，目前仅支持 TEST 、PRE 和 RELEASE，默认 RELEASE，若您调用的 API
+不在线上环境，请一定要指定该参数的值，否则会报 URL 错误。
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+4.3 签名校验
+4.3.1
+➢
+
+组织参与签名计算的字符串
+
+String stringToSign=
+HTTPMethod + "\n" +
+Accept + "\n" +
+
+//建议显示设置 Accept Header。当 Accept 为空时，部分 Http 客户端会给
+
+Accept 设置默认值为 */*，导致签名校验失败。
+Content-MD5 + "\n"
+Content-Type + "\n" +
+Date + "\n" +
+Headers +
+Url
+➢
+
+HTTPMethod 为全大写，如 POST。
+
+➢
+
+Accept、Content-MD5、Content-Type、Date 如果为空也需要添加换行符”\n”，Headers 如果为空不
+需要添加”\n”。
+
+➢
+
+Content-MD5 是指 Body 的 MD5 值，只有当 Body 非 Form 表单时才计算 MD5，计算方式为：
+String content-MD5 = Base64.encodeBase64(MD5(bodyStream.getbytes("UTF-8")));
+bodyStream 为字节数组。
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+➢
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+Headers:
+Headers 是指参与 Headers 签名计算的 Header 的 Key、Value 拼接的字符串，建议对 X-Ca 开头以
+
+及自定义 Header 计算签名，注意如下参数不参与 Headers 签名计算：X-Ca-Signature、
+X-Ca-Signature-Headers、Accept、Content-MD5、Content-Type、Date。
+
+◼
+
+Headers 组织方法:
+
+先对参与 Headers 签名计算的 Header 的 Key 按照字典排序后使用如下方式拼接，如果某个 Header
+的 Value 为空，则使用 HeaderKey + “:” + “\n”参与签名，需要保留 Key 和英文冒号.
+String headers =
+HeaderKey1 + ":" + HeaderValue1 + "\n"\+
+HeaderKey2 + ":" + HeaderValue2 + "\n"\+
+...
+HeaderKeyN + ":" + HeaderValueN + "\n"
+将 Headers 签名中 Header 的 Key 使用英文逗号分割放到 Request 的 Header 中，Key 为：
+X-Ca-Signature-Headers.
+➢
+
+Url
+Url 指 Path + Query + Body 中 Form 参数，组织方法：对 Query+Form 参数按照字典对 Key 进行排序
+
+后按照如下方法拼接，如果 Query 或 Form 参数为空，则 Url = Path，不需要添加 ？，如果某个参数
+的 Value 为空只保留 Key 参与签名，等号不需要再加入签名。
+String url =
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+Path +
+"?" +
+Key1 + "=" + Value1 +
+"&" + Key2 + "=" + Value2 +
+...
+"&" + KeyN + "=" + ValueN
+注意这里 Query 或 Form 参数的 Value 可能有多个，多个的时候只取第一个 Value 参与签名计算。
+4.3.2
+
+计算签名
+
+Mac hmacSha256 = Mac.getInstance("HmacSHA256");
+byte[] keyBytes = secret.getBytes("UTF-8");
+hmacSha256.init(new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA256"));
+String sign = new
+String(Base64.encodeBase64(Sha256.doFinal(stringToSign.getBytes("UTF-8")),"UTF-8"));
+Secret 为 APP 的密钥.
+
+4.3.3
+
+传递签名
+
+将计算的签名结果放到 Request 的 Header 中，Key 为：X-Ca-Signature。
+4.3.4
+
+签名错误排插方法
+
+当签名校验失败时，API 网关会将服务端的 StringToSign 放到 HTTP Response 的 Header 中返回到客
+户端，Key 为：X-Ca-Error-Message，只需要将本地计算的 StringToSign 与服务端返回的 StringToSign 进
+行对比即可找到问题；
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+如果服务端与客户端的 StringToSign 一致请检查用于签名计算的密钥是否正确；
+因为 HTTP Header 中无法表示换行，因此 StringToSign 中的换行符都被过滤掉了，对比时请忽略换行
+符。
+4.3.5
+
+签名 DEMO
+
+签名计算的详细 demo（JAVA）请参照链接：https://github.com/aliyun/api-gateway-demo-sign-java。
+
+5. 错误代码描述表
+5.1 故障代码
+代码
+
+错误描述
+
+33
+
+33 - 电网频率超范围
+
+34
+
+34 - 电网电压超出范围
+
+35
+
+35 - 无市电故障
+
+36
+
+36 - GFCI 漏电流故障
+
+37
+
+37 - 直流/PV 电压过高
+
+38
+
+38 - ISO 故障
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+39
+
+39 - 风扇自检异常告警
+
+40
+
+40 - 逆变器温度过高
+
+41
+
+41 - 一致性故障：主副 CPU AC 侧电压采样不一致
+
+42
+
+42 - 一致性故障：主副 CPU AC 侧频率采样不一致
+
+43
+
+43 - 一致性故障：主副 CPU 接地电流采样不一致
+
+44
+
+44 - 一致性故障：主副 CPU 直流电流注入值采样不一致
+
+45
+
+45 - 一致性故障：主副 CPU 直流电流注入值采样不一致
+
+46
+
+46 - 直流母线电压高
+
+47
+
+47 - 主副一致性故障
+
+48
+
+48 - 十分钟电压平均值过压
+
+49
+
+49 - PV1 防雷器故障
+
+50
+
+50 - PV2 防雷器故障
+
+51
+
+51 - 保险丝故障
+
+52
+
+52 - N 线丢失故障
+
+53
+
+53 - 绝缘阻抗检测：在使能恒流源之前，绝缘阻抗测量电压采样值大于 300mv
+
+54
+
+54 - 绝缘阻抗检测：在使能恒流源之后，绝缘阻抗检测测量电压采样值超出范围
+(1.37v+/-20%)
+
+55
+
+55 - 绝缘阻抗检测：N-PE 继电器切换，绝缘阻抗检测检测测量电压瞬时值小于 40mv
+
+56
+
+56 - GFCI 保护错误：30 毫安等级
+
+57
+
+57 - GFCI 保护错误：60 毫安等级
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+58
+
+58 - GFCI 保护错误：150 毫安等级
+
+59
+
+59 - PV1 组串电流异常
+
+60
+
+60 - PV2 组串电流异常
+
+61
+
+61 - DRMS 通讯失败(S9 Open)
+
+62
+
+62 - DRMS 设备断开(S0 Close)
+
+63
+
+63 - 火线对地故障
+
+64
+
+64 - PV 输入模式错误
+
+65
+
+65 - 地线连接错误
+
+70
+
+70 - AFCI 自检失败(包含 AFCI 检测电路故障以及 CAN 通讯故障)
+
+71
+
+71 - 线路拉弧或接触不良
+
+5.2 警告代码
+代码
+
+警告描述
+
+150
+
+150 - SPD 损坏
+
+151
+
+151 - PV2 SPD 模块损坏
+
+156
+
+156 - 内部风扇异常
+
+157
+
+157 - 外部风扇 1 异常
+
+158
+
+158 - 外部风扇 2 异常
+
+163
+
+163 - PV 组串异常
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+164
+
+164 - 预留故障码
+
+165
+
+165 - 接地连接异常警告
+
+166
+
+166 - CPU 自检-寄存器异常
+
+167
+
+167 - CPU 自检-RAM 异常
+
+168
+
+168 - CPU 自检-ROM 异常
+
+169
+
+169 - 电网电压变量值冗余校验异常
+
+170
+
+170 - 电网频率变量值冗余校验异常
+
+171
+
+171 - DCI 变量值冗余校验异常
+
+172
+
+172 - GFCI 变量值冗余校验异常
+
+173
+
+173 - AID 变量值冗余校验异常
+
+174
+
+174 - 温度过低
+
+175
+
+175 - 电池 SOC 低
+
+176
+
+176 - 电池发生故障
+
+177
+
+177 - 电池通讯断开
+
+178
+
+178 - EPS 输出过载
+
+179
+
+179 - Combox 与 Cloud 连接断开
+
+180
+
+180 - PV 组串反接
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+附录一
+
+字段名
+称
+
+类型
+
+是否必
+须
+
+描述
+
+Action
+
+string
+
+是
+
+UpdateInvData
+
+NA
+
+psn
+
+string
+
+是
+
+采集器序列号
+
+NA
+
+sn
+
+string
+
+是
+
+逆变器序列号
+
+NA
+
+string
+
+是
+
+采样时间
+yyyy-MM-dd
+hh:mm:ss
+
+NA
+
+tim
+
+cf
+
+int
+
+是
+
+散热片温度
+
+0.1℃
+
+fac
+
+int
+
+是
+
+频率
+
+0.01Hz
+
+pac
+
+int
+
+是
+
+输出功率
+
+1W
+
+eto
+
+int
+
+是
+
+总发电量
+
+0.1KWH
+
+etd
+
+int
+
+是
+
+当天发电量
+
+0.1KWH
+
+hto
+
+int
+
+是
+
+总发电时数
+
+Hr
+
+v1
+
+int
+
+是
+
+pv 电压 1
+
+0.1V
+
+v2
+
+int
+
+是
+
+pv 电压 2
+
+0.1V
+
+v3
+
+int
+
+是
+
+pv 电压 3
+
+0.1V
+
+v4
+
+int
+
+否
+
+pv 电压 4
+
+0.1V
+
+v5
+
+int
+
+否
+
+pv 电压 5
+
+0.1V
+
+i1
+
+int
+
+是
+
+pv 电流 1
+
+0.01A
+
+i2
+
+int
+
+是
+
+pv 电流 2
+
+0.01A
+
+AiSWEI New Energy Co., Ltd
+
+处理数据精度
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+i3
+
+int
+
+是
+
+pv 电流 3
+
+0.01A
+
+i4
+
+int
+
+否
+
+pv 电流 4
+
+0.01A
+
+i5
+
+int
+
+否
+
+pv 电流 5
+
+0.01A
+
+va1
+
+int
+
+是
+
+ac 电压 1
+
+0.1V
+
+va2
+
+int
+
+是
+
+ac 电压 2
+
+0.1V
+
+va3
+
+int
+
+是
+
+ac 电压 3
+
+0.1V
+
+ia1
+
+int
+
+是
+
+ac 电流 1
+
+0.1A
+
+ia2
+
+int
+
+是
+
+ac 电流 2
+
+0.1A
+
+ia3
+
+int
+
+是
+
+ac 电流 3
+
+0.1A
+
+itv
+
+string
+
+是
+
+时间间隔
+
+整数
+
+er
+
+int
+
+是
+
+故障代码
+
+整数
+
+wn0
+
+int
+
+是
+
+警告代码
+
+整数
+
+pf
+
+int
+
+否
+
+功率因数
+
+0.01
+
+tu
+
+int
+
+否
+
+u 相温度
+
+0.1℃
+
+tv
+
+int
+
+否
+
+v 相温度
+
+0.1℃
+
+tw
+
+int
+
+否
+
+w 相温度
+
+0.1℃
+
+bv
+
+int
+
+否
+
+boost 电压
+
+0.1V
+
+s1
+
+int
+
+否
+
+组串电流 1
+
+0.1A
+
+s2
+
+int
+
+否
+
+组串电流 2
+
+0.1A
+
+s3
+
+int
+
+否
+
+组串电流 3
+
+0.1A
+
+s4
+
+int
+
+否
+
+组串电流 4
+
+0.1A
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+s5
+
+int
+
+否
+
+组串电流 5
+
+0.1A
+
+s6
+
+int
+
+否
+
+组串电流 6
+
+0.1A
+
+s7
+
+int
+
+否
+
+组串电流 7
+
+0.1A
+
+s8
+
+int
+
+否
+
+组串电流 8
+
+0.1A
+
+s9
+
+int
+
+否
+
+组串电流 9
+
+0.1A
+
+s10
+
+int
+
+否
+
+组串电流 10
+
+0.1A
+
+附录二
+
+country name
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+
+country code
+
+province code province name
+
+86.00
+
+1
+
+Anhui
+
+安徽
+
+86.00
+
+2
+
+Beijing
+
+北京
+
+86.00
+
+3
+
+Chongqing
+
+重庆
+
+86.00
+
+4
+
+Fujian
+
+福建
+
+86.00
+
+5
+
+Gansu
+
+甘肃
+
+86.00
+
+6
+
+Guangdong
+
+广东
+
+86.00
+
+7
+
+Guangxi
+
+广西
+
+86.00
+
+8
+
+Guizhou
+
+贵州
+
+86.00
+
+9
+
+Hainan
+
+海南
+
+86.00
+
+10
+
+Hebei
+
+河北
+
+86.00
+
+11
+
+Heilongjiang
+
+黑龙
+
+86.00
+
+12
+
+Henan
+
+河南
+
+86.00
+
+13
+
+Hong Kong
+
+香港
+
+86.00
+
+14
+
+Hubei
+
+湖北
+
+86.00
+
+15
+
+Hunan
+
+湖南
+
+86.00
+
+16
+
+Jiangsu
+
+江苏
+
+86.00
+
+17
+
+Jiangxi
+
+江西
+
+86.00
+
+18
+
+Jilin
+
+吉林
+
+AiSWEI New Energy Co., Ltd
+
+文件名称Document Name：
+
+文件编号
+
+制订部门
+
+Doc. No.
+
+Originating Dept.
+
+版本
+
+页数
+
+第 页/共 页
+
+Rev. No.
+
+Page
+
+Page of
+
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+China
+
+86.00
+
+19
+
+Liaoning
+
+辽宁
+
+86.00
+
+20
+
+Macau
+
+澳门
+
+86.00
+
+21
+
+Inner Mongolia
+
+内蒙古
+
+86.00
+
+22
+
+Ningxia
+
+宁夏
+
+86.00
+
+23
+
+Qinghai
+
+青海
+
+86.00
+
+24
+
+Shandong
+
+山东
+
+86.00
+
+25
+
+Shanxi
+
+山西
+
+86.00
+
+26
+
+Shanxi
+
+陕西
+
+86.00
+
+27
+
+Shanghai
+
+上海
+
+86.00
+
+28
+
+Sichuan
+
+四川
+
+86.00
+
+29
+
+Taiwan
+
+台湾
+
+86.00
+
+30
+
+Tianjin
+
+天津
+
+86.00
+
+31
+
+Tibet
+
+西藏
+
+86.00
+
+32
+
+Sinkiang
+
+新疆
+
+86.00
+
+33
+
+Yunnan
+
+云南
+
+86.00
+
+34
+
+Zhejiang
+
+浙江
+
+AiSWEI New Energy Co., Ltd
+
+
