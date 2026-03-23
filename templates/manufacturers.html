@@ -15,7 +15,7 @@
 
 <!-- 添加/编辑厂家弹窗 -->
 <div class="modal fade" id="mfrModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="mfrModalTitle">添加厂家</h5>
@@ -29,20 +29,24 @@
                         <input type="text" class="form-control" id="mf-name" required placeholder="如: 华为、阳光电源">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">厂家编码 *</label>
-                        <input type="text" class="form-control" id="mf-code" required placeholder="如: huawei、sungrow，用于匹配适配器">
+                        <label class="form-label">厂家编码 (选择适配器) *</label>
+                        <select class="form-select" id="mf-code" required onchange="onAdapterChange()">
+                            <option value="">-- 请选择厂家协议 --</option>
+                        </select>
+                        <div class="form-text" id="mf-code-desc"></div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">API基础地址</label>
-                        <input type="text" class="form-control" id="mf-url" placeholder="https://api.example.com">
+                    <div class="mb-3" id="url-group" style="display:none;">
+                        <label class="form-label">API地址</label>
+                        <select class="form-select mb-2" id="mf-url-select" onchange="onUrlSelect()">
+                            <option value="">-- 选择预设地址 --</option>
+                        </select>
+                        <input type="text" class="form-control" id="mf-url" placeholder="或手动输入自定义地址">
+                        <div class="form-text">选择预设地址会自动填入，也可手动修改</div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">适配器类名</label>
-                        <input type="text" class="form-control" id="mf-adapter" placeholder="与编码一致即可">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">认证配置(JSON)</label>
-                        <textarea class="form-control" id="mf-auth" rows="3" placeholder='{"username":"","password":""}'></textarea>
+                    <!-- 动态认证字段容器 -->
+                    <div id="auth-fields-container" style="display:none;">
+                        <label class="form-label fw-bold mb-2"><i class="bi bi-shield-lock"></i> 认证配置</label>
+                        <div id="auth-fields"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">描述</label>
@@ -57,44 +61,232 @@
         </div>
     </div>
 </div>
+
+<!-- URL连通性测试弹窗 -->
+<div class="modal fade" id="urlTestModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">URL连通性测试</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center" id="urlTestBody">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">测试中...</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', loadManufacturers);
+let adapterConfigs = {};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 并行加载适配器配置和厂家列表
+    const [configs] = await Promise.all([
+        api('/api/manufacturers/adapter-configs'),
+        loadManufacturers()
+    ]);
+    adapterConfigs = configs || {};
+    populateAdapterSelect();
+});
+
+function populateAdapterSelect() {
+    const sel = document.getElementById('mf-code');
+    // 保留第一个placeholder选项
+    sel.innerHTML = '<option value="">-- 请选择厂家协议 --</option>';
+    for (const [code, meta] of Object.entries(adapterConfigs)) {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = meta.name;
+        sel.appendChild(opt);
+    }
+    // 添加自定义选项
+    const customOpt = document.createElement('option');
+    customOpt.value = "__custom__";
+    customOpt.textContent = "自定义 (手动填写)";
+    sel.appendChild(customOpt);
+}
+
+function onAdapterChange() {
+    const code = document.getElementById('mf-code').value;
+    const urlGroup = document.getElementById('url-group');
+    const authContainer = document.getElementById('auth-fields-container');
+    const authFields = document.getElementById('auth-fields');
+    const descEl = document.getElementById('mf-code-desc');
+
+    if (code === "__custom__") {
+        // 自定义模式：显示URL输入和空白认证区
+        urlGroup.style.display = '';
+        document.getElementById('mf-url-select').innerHTML = '<option value="">无预设地址</option>';
+        document.getElementById('mf-url').value = '';
+        authContainer.style.display = '';
+        authFields.innerHTML = `
+            <div class="mb-3">
+                <label class="form-label">认证配置 (JSON)</label>
+                <textarea class="form-control auth-json-raw" rows="3" placeholder='{"key":"value"}'></textarea>
+            </div>`;
+        descEl.textContent = '手动配置，需确保编码与适配器匹配';
+        // 名称自动填入
+        if (!document.getElementById('mf-name').value) {
+            document.getElementById('mf-name').value = '';
+        }
+        return;
+    }
+
+    if (!code || !adapterConfigs[code]) {
+        urlGroup.style.display = 'none';
+        authContainer.style.display = 'none';
+        authFields.innerHTML = '';
+        descEl.textContent = '';
+        return;
+    }
+
+    const meta = adapterConfigs[code];
+    descEl.textContent = meta.description || '';
+
+    // 自动填入厂家名称（仅在空白时）
+    const nameInput = document.getElementById('mf-name');
+    if (!nameInput.value || !document.getElementById('mf-id').value) {
+        nameInput.value = meta.name;
+    }
+
+    // 填充URL选项
+    urlGroup.style.display = '';
+    const urlSel = document.getElementById('mf-url-select');
+    urlSel.innerHTML = '<option value="">-- 选择预设地址 --</option>';
+    (meta.urls || []).forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.url;
+        opt.textContent = `${u.label} - ${u.url}`;
+        urlSel.appendChild(opt);
+    });
+    // 自动选择第一个URL
+    if (meta.urls && meta.urls.length > 0) {
+        urlSel.value = meta.urls[0].url;
+        document.getElementById('mf-url').value = meta.urls[0].url;
+    }
+
+    // 生成认证字段
+    if (meta.auth_fields && meta.auth_fields.length > 0) {
+        authContainer.style.display = '';
+        authFields.innerHTML = meta.auth_fields.map(f => `
+            <div class="mb-3">
+                <label class="form-label">${f.label}${f.required ? ' *' : ''}</label>
+                <input type="${f.type || 'text'}" class="form-control auth-field"
+                       data-key="${f.key}" ${f.required ? 'required' : ''}
+                       placeholder="${f.placeholder || ''}">
+            </div>
+        `).join('');
+    } else {
+        authContainer.style.display = 'none';
+        authFields.innerHTML = '';
+    }
+}
+
+function onUrlSelect() {
+    const sel = document.getElementById('mf-url-select');
+    if (sel.value) {
+        document.getElementById('mf-url').value = sel.value;
+    }
+}
+
+function collectAuthConfig() {
+    // 检查是否有原始JSON文本框（自定义模式）
+    const rawEl = document.querySelector('.auth-json-raw');
+    if (rawEl) {
+        return rawEl.value.trim() || null;
+    }
+    // 收集动态认证字段
+    const fields = document.querySelectorAll('.auth-field');
+    if (fields.length === 0) return null;
+    const config = {};
+    let hasValue = false;
+    fields.forEach(el => {
+        const key = el.dataset.key;
+        const val = el.value.trim();
+        if (val) {
+            config[key] = val;
+            hasValue = true;
+        }
+    });
+    return hasValue ? JSON.stringify(config) : null;
+}
+
+function fillAuthFields(authConfigStr) {
+    if (!authConfigStr) return;
+    try {
+        const config = typeof authConfigStr === 'string' ? JSON.parse(authConfigStr) : authConfigStr;
+        // 先尝试填充动态字段
+        const fields = document.querySelectorAll('.auth-field');
+        if (fields.length > 0) {
+            fields.forEach(el => {
+                const key = el.dataset.key;
+                if (config[key] !== undefined) {
+                    el.value = config[key];
+                }
+            });
+        }
+        // 如果是原始JSON模式
+        const rawEl = document.querySelector('.auth-json-raw');
+        if (rawEl) {
+            rawEl.value = typeof authConfigStr === 'string' ? authConfigStr : JSON.stringify(authConfigStr, null, 2);
+        }
+    } catch (e) {
+        // 非JSON格式，忽略
+    }
+}
 
 async function loadManufacturers() {
     const data = await api('/api/manufacturers');
     const container = document.getElementById('mfr-cards');
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
         container.innerHTML = '<div class="col-12 text-center text-muted">暂无厂家，请先添加</div>';
         return;
     }
-    container.innerHTML = data.map(m => `
+    container.innerHTML = data.map(m => {
+        const meta = adapterConfigs[m.code];
+        const displayName = meta ? meta.name : m.code;
+        let authInfo = '';
+        if (m.auth_config) {
+            try {
+                const ac = JSON.parse(m.auth_config);
+                const keys = Object.keys(ac);
+                authInfo = keys.map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('');
+            } catch(e) {}
+        }
+        return `
         <div class="col-md-4 mb-3">
             <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">${m.name}
                         <span class="badge ${m.is_active ? 'bg-success' : 'bg-secondary'} ms-2">${m.is_active ? '启用' : '停用'}</span>
                     </h5>
-                    <p class="card-text text-muted mb-1">编码: ${m.code}</p>
-                    <p class="card-text text-muted mb-1">API: ${m.api_base_url || '未配置'}</p>
-                    <p class="card-text text-muted mb-1">适配器: ${m.adapter_class || '未配置'}</p>
-                    ${m.description ? `<p class="card-text">${m.description}</p>` : ''}
+                    <p class="card-text text-muted mb-1"><i class="bi bi-cpu"></i> 协议: ${displayName}</p>
+                    <p class="card-text text-muted mb-1"><i class="bi bi-link-45deg"></i> API: ${m.api_base_url || '未配置'}</p>
+                    ${authInfo ? `<p class="card-text mb-1"><i class="bi bi-key"></i> 认证: ${authInfo}</p>` : ''}
+                    ${m.description ? `<p class="card-text text-muted small">${m.description}</p>` : ''}
                 </div>
                 <div class="card-footer d-flex justify-content-end gap-2">
                     <button class="btn btn-sm btn-outline-primary" onclick="editMfr(${m.id})"><i class="bi bi-pencil"></i> 编辑</button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteMfr(${m.id})"><i class="bi bi-trash"></i> 删除</button>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function resetMfrForm() {
     document.getElementById('mfrModalTitle').textContent = '添加厂家';
     document.getElementById('mfrForm').reset();
     document.getElementById('mf-id').value = '';
+    document.getElementById('url-group').style.display = 'none';
+    document.getElementById('auth-fields-container').style.display = 'none';
+    document.getElementById('auth-fields').innerHTML = '';
+    document.getElementById('mf-code-desc').textContent = '';
+    populateAdapterSelect();
 }
 
 async function editMfr(id) {
@@ -103,24 +295,60 @@ async function editMfr(id) {
     document.getElementById('mfrModalTitle').textContent = '编辑厂家';
     document.getElementById('mf-id').value = m.id;
     document.getElementById('mf-name').value = m.name;
-    document.getElementById('mf-code').value = m.code;
-    document.getElementById('mf-url').value = m.api_base_url || '';
-    document.getElementById('mf-adapter').value = m.adapter_class || '';
-    document.getElementById('mf-auth').value = m.auth_config || '';
+
+    // 设置编码选择
+    const codeSel = document.getElementById('mf-code');
+    if (adapterConfigs[m.code]) {
+        codeSel.value = m.code;
+    } else {
+        codeSel.value = '__custom__';
+    }
+    onAdapterChange();
+
+    // 填入URL
+    if (m.api_base_url) {
+        document.getElementById('mf-url').value = m.api_base_url;
+        // 尝试匹配预设URL
+        const urlSel = document.getElementById('mf-url-select');
+        const opts = Array.from(urlSel.options);
+        const match = opts.find(o => o.value === m.api_base_url);
+        if (match) {
+            urlSel.value = m.api_base_url;
+        } else {
+            urlSel.value = '';
+        }
+    }
+
+    // 填入认证配置
+    fillAuthFields(m.auth_config);
+
     document.getElementById('mf-desc').value = m.description || '';
     new bootstrap.Modal(document.getElementById('mfrModal')).show();
 }
 
 async function saveMfr() {
     const id = document.getElementById('mf-id').value;
+    const codeVal = document.getElementById('mf-code').value;
+    const actualCode = codeVal === '__custom__' ? prompt('请输入自定义厂家编码:') : codeVal;
+    if (!actualCode) {
+        alert('请选择或输入厂家编码');
+        return;
+    }
+
     const data = {
         name: document.getElementById('mf-name').value,
-        code: document.getElementById('mf-code').value,
+        code: actualCode,
         api_base_url: document.getElementById('mf-url').value || null,
-        adapter_class: document.getElementById('mf-adapter').value || '',
-        auth_config: document.getElementById('mf-auth').value || null,
+        adapter_class: actualCode,
+        auth_config: collectAuthConfig(),
         description: document.getElementById('mf-desc').value || null,
     };
+
+    if (!data.name) {
+        alert('请输入厂家名称');
+        return;
+    }
+
     if (id) {
         await api(`/api/manufacturers/${id}`, 'PUT', data);
     } else {
