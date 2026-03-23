@@ -15,7 +15,7 @@
 
 <!-- 添加/编辑厂家弹窗 -->
 <div class="modal fade" id="mfrModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="mfrModalTitle">添加厂家</h5>
@@ -24,55 +24,53 @@
             <div class="modal-body">
                 <form id="mfrForm">
                     <input type="hidden" id="mf-id">
+                    <input type="hidden" id="mf-detected-url" value="">
+
+                    <!-- 第一步：选择厂家 -->
                     <div class="mb-3">
-                        <label class="form-label">厂家名称 *</label>
-                        <input type="text" class="form-control" id="mf-name" required placeholder="如: 华为、阳光电源">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">厂家编码 (选择适配器) *</label>
+                        <label class="form-label fw-bold">选择厂家协议 *</label>
                         <select class="form-select" id="mf-code" required onchange="onAdapterChange()">
-                            <option value="">-- 请选择厂家协议 --</option>
+                            <option value="">-- 请选择 --</option>
                         </select>
-                        <div class="form-text" id="mf-code-desc"></div>
+                        <div class="form-text text-muted" id="mf-code-desc"></div>
                     </div>
-                    <div class="mb-3" id="url-group" style="display:none;">
-                        <label class="form-label">API地址</label>
-                        <select class="form-select mb-2" id="mf-url-select" onchange="onUrlSelect()">
-                            <option value="">-- 选择预设地址 --</option>
-                        </select>
-                        <input type="text" class="form-control" id="mf-url" placeholder="或手动输入自定义地址">
-                        <div class="form-text">选择预设地址会自动填入，也可手动修改</div>
+
+                    <!-- 厂家名称（自动填充，可改） -->
+                    <div class="mb-3" id="name-group" style="display:none;">
+                        <label class="form-label">厂家名称 *</label>
+                        <input type="text" class="form-control" id="mf-name" required>
                     </div>
-                    <!-- 动态认证字段容器 -->
-                    <div id="auth-fields-container" style="display:none;">
-                        <label class="form-label fw-bold mb-2"><i class="bi bi-shield-lock"></i> 认证配置</label>
+
+                    <!-- 动态认证字段 -->
+                    <div id="auth-section" style="display:none;">
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label fw-bold mb-0"><i class="bi bi-shield-lock"></i> 认证参数</label>
+                        </div>
                         <div id="auth-fields"></div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">描述</label>
-                        <textarea class="form-control" id="mf-desc" rows="2"></textarea>
+
+                    <!-- 连接测试区域 -->
+                    <div id="test-section" style="display:none;">
+                        <hr>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="form-label fw-bold mb-0"><i class="bi bi-wifi"></i> 连接测试</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btn-test" onclick="testConnection()">
+                                <i class="bi bi-arrow-repeat"></i> 测试连接
+                            </button>
+                        </div>
+                        <div id="test-result"></div>
+                    </div>
+
+                    <!-- 描述 -->
+                    <div class="mb-3 mt-3" id="desc-group" style="display:none;">
+                        <label class="form-label">备注</label>
+                        <textarea class="form-control" id="mf-desc" rows="2" placeholder="可选备注"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" onclick="saveMfr()">保存</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- URL连通性测试弹窗 -->
-<div class="modal fade" id="urlTestModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title">URL连通性测试</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center" id="urlTestBody">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2">测试中...</p>
+                <button type="button" class="btn btn-primary" id="btn-save" onclick="saveMfr()">保存</button>
             </div>
         </div>
     </div>
@@ -84,7 +82,6 @@
 let adapterConfigs = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 并行加载适配器配置和厂家列表
     const [configs] = await Promise.all([
         api('/api/manufacturers/adapter-configs'),
         loadManufacturers()
@@ -95,51 +92,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function populateAdapterSelect() {
     const sel = document.getElementById('mf-code');
-    // 保留第一个placeholder选项
-    sel.innerHTML = '<option value="">-- 请选择厂家协议 --</option>';
+    sel.innerHTML = '<option value="">-- 请选择 --</option>';
     for (const [code, meta] of Object.entries(adapterConfigs)) {
         const opt = document.createElement('option');
         opt.value = code;
         opt.textContent = meta.name;
         sel.appendChild(opt);
     }
-    // 添加自定义选项
-    const customOpt = document.createElement('option');
-    customOpt.value = "__custom__";
-    customOpt.textContent = "自定义 (手动填写)";
-    sel.appendChild(customOpt);
 }
 
 function onAdapterChange() {
     const code = document.getElementById('mf-code').value;
-    const urlGroup = document.getElementById('url-group');
-    const authContainer = document.getElementById('auth-fields-container');
+    const nameGroup = document.getElementById('name-group');
+    const authSection = document.getElementById('auth-section');
     const authFields = document.getElementById('auth-fields');
+    const testSection = document.getElementById('test-section');
+    const descGroup = document.getElementById('desc-group');
     const descEl = document.getElementById('mf-code-desc');
 
-    if (code === "__custom__") {
-        // 自定义模式：显示URL输入和空白认证区
-        urlGroup.style.display = '';
-        document.getElementById('mf-url-select').innerHTML = '<option value="">无预设地址</option>';
-        document.getElementById('mf-url').value = '';
-        authContainer.style.display = '';
-        authFields.innerHTML = `
-            <div class="mb-3">
-                <label class="form-label">认证配置 (JSON)</label>
-                <textarea class="form-control auth-json-raw" rows="3" placeholder='{"key":"value"}'></textarea>
-            </div>`;
-        descEl.textContent = '手动配置，需确保编码与适配器匹配';
-        // 名称自动填入
-        if (!document.getElementById('mf-name').value) {
-            document.getElementById('mf-name').value = '';
-        }
-        return;
-    }
+    // 清空之前的测试结果
+    document.getElementById('test-result').innerHTML = '';
+    document.getElementById('mf-detected-url').value = '';
 
     if (!code || !adapterConfigs[code]) {
-        urlGroup.style.display = 'none';
-        authContainer.style.display = 'none';
-        authFields.innerHTML = '';
+        nameGroup.style.display = 'none';
+        authSection.style.display = 'none';
+        testSection.style.display = 'none';
+        descGroup.style.display = 'none';
         descEl.textContent = '';
         return;
     }
@@ -147,59 +126,36 @@ function onAdapterChange() {
     const meta = adapterConfigs[code];
     descEl.textContent = meta.description || '';
 
-    // 自动填入厂家名称（仅在空白时）
+    // 显示名称（自动填入）
+    nameGroup.style.display = '';
     const nameInput = document.getElementById('mf-name');
     if (!nameInput.value || !document.getElementById('mf-id').value) {
         nameInput.value = meta.name;
     }
 
-    // 填充URL选项
-    urlGroup.style.display = '';
-    const urlSel = document.getElementById('mf-url-select');
-    urlSel.innerHTML = '<option value="">-- 选择预设地址 --</option>';
-    (meta.urls || []).forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.url;
-        opt.textContent = `${u.label} - ${u.url}`;
-        urlSel.appendChild(opt);
-    });
-    // 自动选择第一个URL
-    if (meta.urls && meta.urls.length > 0) {
-        urlSel.value = meta.urls[0].url;
-        document.getElementById('mf-url').value = meta.urls[0].url;
-    }
-
     // 生成认证字段
     if (meta.auth_fields && meta.auth_fields.length > 0) {
-        authContainer.style.display = '';
+        authSection.style.display = '';
         authFields.innerHTML = meta.auth_fields.map(f => `
             <div class="mb-3">
                 <label class="form-label">${f.label}${f.required ? ' *' : ''}</label>
                 <input type="${f.type || 'text'}" class="form-control auth-field"
                        data-key="${f.key}" ${f.required ? 'required' : ''}
                        placeholder="${f.placeholder || ''}">
+                ${f.help_text ? `<div class="form-text">${f.help_text}</div>` : ''}
             </div>
         `).join('');
     } else {
-        authContainer.style.display = 'none';
+        authSection.style.display = 'none';
         authFields.innerHTML = '';
     }
-}
 
-function onUrlSelect() {
-    const sel = document.getElementById('mf-url-select');
-    if (sel.value) {
-        document.getElementById('mf-url').value = sel.value;
-    }
+    // 显示测试和描述区域
+    testSection.style.display = '';
+    descGroup.style.display = '';
 }
 
 function collectAuthConfig() {
-    // 检查是否有原始JSON文本框（自定义模式）
-    const rawEl = document.querySelector('.auth-json-raw');
-    if (rawEl) {
-        return rawEl.value.trim() || null;
-    }
-    // 收集动态认证字段
     const fields = document.querySelectorAll('.auth-field');
     if (fields.length === 0) return null;
     const config = {};
@@ -212,30 +168,101 @@ function collectAuthConfig() {
             hasValue = true;
         }
     });
-    return hasValue ? JSON.stringify(config) : null;
+    return hasValue ? config : null;
 }
 
 function fillAuthFields(authConfigStr) {
     if (!authConfigStr) return;
     try {
         const config = typeof authConfigStr === 'string' ? JSON.parse(authConfigStr) : authConfigStr;
-        // 先尝试填充动态字段
-        const fields = document.querySelectorAll('.auth-field');
-        if (fields.length > 0) {
-            fields.forEach(el => {
-                const key = el.dataset.key;
-                if (config[key] !== undefined) {
-                    el.value = config[key];
+        document.querySelectorAll('.auth-field').forEach(el => {
+            const key = el.dataset.key;
+            if (config[key] !== undefined) {
+                el.value = config[key];
+            }
+        });
+    } catch (e) {}
+}
+
+async function testConnection() {
+    const code = document.getElementById('mf-code').value;
+    if (!code) return;
+
+    const authConfig = collectAuthConfig();
+    const resultDiv = document.getElementById('test-result');
+    const btn = document.getElementById('btn-test');
+
+    // 显示加载状态
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 探测中...';
+    resultDiv.innerHTML = `
+        <div class="alert alert-info py-2 mb-0">
+            <div class="d-flex align-items-center">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                正在自动探测所有候选节点，请稍候...
+            </div>
+        </div>`;
+
+    try {
+        const result = await api('/api/manufacturers/test-connection', 'POST', {
+            code: code,
+            auth_config: authConfig,
+        });
+
+        if (!result) {
+            resultDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0">请求失败</div>';
+            return;
+        }
+
+        // 渲染测试结果
+        let html = '';
+        if (result.success && result.url) {
+            document.getElementById('mf-detected-url').value = result.url;
+            const warning = result.warning ? `<br><small class="text-warning"><i class="bi bi-exclamation-triangle"></i> ${result.warning}</small>` : '';
+            html += `<div class="alert alert-success py-2 mb-2">
+                <i class="bi bi-check-circle"></i> <strong>已匹配:</strong> ${result.label || result.url}${warning}
+            </div>`;
+        } else {
+            html += `<div class="alert alert-danger py-2 mb-2">
+                <i class="bi bi-x-circle"></i> ${result.error || '所有节点不可达'}
+            </div>`;
+        }
+
+        // 详细结果
+        if (result.results && result.results.length > 0) {
+            html += '<div class="small">';
+            html += '<table class="table table-sm table-borderless mb-0">';
+            for (const r of result.results) {
+                let icon, badge;
+                if (r.auth_ok === true) {
+                    icon = '<i class="bi bi-check-circle-fill text-success"></i>';
+                    badge = '<span class="badge bg-success">认证成功</span>';
+                } else if (r.reachable && r.auth_ok === false) {
+                    icon = '<i class="bi bi-exclamation-circle-fill text-warning"></i>';
+                    badge = `<span class="badge bg-warning text-dark" title="${r.auth_detail || ''}">可达/认证失败</span>`;
+                } else if (r.reachable) {
+                    icon = '<i class="bi bi-circle-fill text-info"></i>';
+                    badge = '<span class="badge bg-info">可达</span>';
+                } else {
+                    icon = '<i class="bi bi-x-circle-fill text-danger"></i>';
+                    badge = `<span class="badge bg-danger" title="${r.detail || ''}">不可达</span>`;
                 }
-            });
+                html += `<tr>
+                    <td class="py-0">${icon}</td>
+                    <td class="py-0">${r.label || ''}</td>
+                    <td class="py-0">${badge}</td>
+                </tr>`;
+            }
+            html += '</table></div>';
         }
-        // 如果是原始JSON模式
-        const rawEl = document.querySelector('.auth-json-raw');
-        if (rawEl) {
-            rawEl.value = typeof authConfigStr === 'string' ? authConfigStr : JSON.stringify(authConfigStr, null, 2);
-        }
+
+        resultDiv.innerHTML = html;
+
     } catch (e) {
-        // 非JSON格式，忽略
+        resultDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0">测试出错: ${e.message || e}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> 测试连接';
     }
 }
 
@@ -249,13 +276,19 @@ async function loadManufacturers() {
     container.innerHTML = data.map(m => {
         const meta = adapterConfigs[m.code];
         const displayName = meta ? meta.name : m.code;
-        let authInfo = '';
+        let authBadges = '';
         if (m.auth_config) {
             try {
                 const ac = JSON.parse(m.auth_config);
                 const keys = Object.keys(ac);
-                authInfo = keys.map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('');
+                authBadges = keys.map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('');
             } catch(e) {}
+        }
+        // 匹配URL标签
+        let urlLabel = m.api_base_url || '自动探测';
+        if (meta && meta.urls) {
+            const found = meta.urls.find(u => u.url === m.api_base_url);
+            if (found) urlLabel = found.label;
         }
         return `
         <div class="col-md-4 mb-3">
@@ -264,10 +297,10 @@ async function loadManufacturers() {
                     <h5 class="card-title">${m.name}
                         <span class="badge ${m.is_active ? 'bg-success' : 'bg-secondary'} ms-2">${m.is_active ? '启用' : '停用'}</span>
                     </h5>
-                    <p class="card-text text-muted mb-1"><i class="bi bi-cpu"></i> 协议: ${displayName}</p>
-                    <p class="card-text text-muted mb-1"><i class="bi bi-link-45deg"></i> API: ${m.api_base_url || '未配置'}</p>
-                    ${authInfo ? `<p class="card-text mb-1"><i class="bi bi-key"></i> 认证: ${authInfo}</p>` : ''}
-                    ${m.description ? `<p class="card-text text-muted small">${m.description}</p>` : ''}
+                    <p class="card-text text-muted mb-1"><i class="bi bi-cpu"></i> ${displayName}</p>
+                    <p class="card-text text-muted mb-1"><i class="bi bi-link-45deg"></i> ${urlLabel}</p>
+                    ${authBadges ? `<p class="card-text mb-1"><i class="bi bi-key"></i> ${authBadges}</p>` : ''}
+                    ${m.description ? `<p class="card-text text-muted small mt-1">${m.description}</p>` : ''}
                 </div>
                 <div class="card-footer d-flex justify-content-end gap-2">
                     <button class="btn btn-sm btn-outline-primary" onclick="editMfr(${m.id})"><i class="bi bi-pencil"></i> 编辑</button>
@@ -282,9 +315,13 @@ function resetMfrForm() {
     document.getElementById('mfrModalTitle').textContent = '添加厂家';
     document.getElementById('mfrForm').reset();
     document.getElementById('mf-id').value = '';
-    document.getElementById('url-group').style.display = 'none';
-    document.getElementById('auth-fields-container').style.display = 'none';
+    document.getElementById('mf-detected-url').value = '';
+    document.getElementById('name-group').style.display = 'none';
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('test-section').style.display = 'none';
+    document.getElementById('desc-group').style.display = 'none';
     document.getElementById('auth-fields').innerHTML = '';
+    document.getElementById('test-result').innerHTML = '';
     document.getElementById('mf-code-desc').textContent = '';
     populateAdapterSelect();
 }
@@ -294,29 +331,18 @@ async function editMfr(id) {
     resetMfrForm();
     document.getElementById('mfrModalTitle').textContent = '编辑厂家';
     document.getElementById('mf-id').value = m.id;
-    document.getElementById('mf-name').value = m.name;
 
-    // 设置编码选择
+    // 设置编码
     const codeSel = document.getElementById('mf-code');
-    if (adapterConfigs[m.code]) {
-        codeSel.value = m.code;
-    } else {
-        codeSel.value = '__custom__';
-    }
+    codeSel.value = adapterConfigs[m.code] ? m.code : '';
     onAdapterChange();
 
-    // 填入URL
+    // 填入名称
+    document.getElementById('mf-name').value = m.name;
+
+    // 已有URL存入隐藏字段
     if (m.api_base_url) {
-        document.getElementById('mf-url').value = m.api_base_url;
-        // 尝试匹配预设URL
-        const urlSel = document.getElementById('mf-url-select');
-        const opts = Array.from(urlSel.options);
-        const match = opts.find(o => o.value === m.api_base_url);
-        if (match) {
-            urlSel.value = m.api_base_url;
-        } else {
-            urlSel.value = '';
-        }
+        document.getElementById('mf-detected-url').value = m.api_base_url;
     }
 
     // 填入认证配置
@@ -328,26 +354,40 @@ async function editMfr(id) {
 
 async function saveMfr() {
     const id = document.getElementById('mf-id').value;
-    const codeVal = document.getElementById('mf-code').value;
-    const actualCode = codeVal === '__custom__' ? prompt('请输入自定义厂家编码:') : codeVal;
-    if (!actualCode) {
-        alert('请选择或输入厂家编码');
-        return;
+    const code = document.getElementById('mf-code').value;
+    const name = document.getElementById('mf-name').value;
+
+    if (!code) { alert('请选择厂家协议'); return; }
+    if (!name) { alert('请输入厂家名称'); return; }
+
+    // 获取探测到的URL，如果没有则自动探测
+    let detectedUrl = document.getElementById('mf-detected-url').value;
+    const authConfig = collectAuthConfig();
+
+    // 如果没有探测过URL，自动探测一次
+    if (!detectedUrl && code !== 'demo') {
+        const testResult = document.getElementById('test-result');
+        testResult.innerHTML = '<div class="alert alert-info py-2"><span class="spinner-border spinner-border-sm me-2"></span>保存前自动探测URL...</div>';
+
+        try {
+            const result = await api('/api/manufacturers/test-connection', 'POST', {
+                code: code,
+                auth_config: authConfig,
+            });
+            if (result && result.success && result.url) {
+                detectedUrl = result.url;
+            }
+        } catch (e) {}
     }
 
     const data = {
-        name: document.getElementById('mf-name').value,
-        code: actualCode,
-        api_base_url: document.getElementById('mf-url').value || null,
-        adapter_class: actualCode,
-        auth_config: collectAuthConfig(),
+        name: name,
+        code: code,
+        api_base_url: detectedUrl || null,
+        adapter_class: code,
+        auth_config: authConfig ? JSON.stringify(authConfig) : null,
         description: document.getElementById('mf-desc').value || null,
     };
-
-    if (!data.name) {
-        alert('请输入厂家名称');
-        return;
-    }
 
     if (id) {
         await api(`/api/manufacturers/${id}`, 'PUT', data);
