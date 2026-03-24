@@ -28,6 +28,7 @@ class AuthField:
     required: bool = True
     placeholder: str = ""
     help_text: str = ""  # 补充说明
+    default: str = ""    # 默认值
 
     def to_dict(self) -> dict:
         return {
@@ -37,6 +38,7 @@ class AuthField:
             "required": self.required,
             "placeholder": self.placeholder,
             "help_text": self.help_text,
+            "default": self.default,
         }
 
 
@@ -97,6 +99,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=True,
                 placeholder="北向API系统账号",
                 help_text="FusionSolar北向接口的userName，在智能光伏云管理系统中创建",
+                default="YRKJAPI",
             ),
             AuthField(
                 key="password",
@@ -105,6 +108,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=True,
                 placeholder="北向API systemCode",
                 help_text="FusionSolar北向接口的systemCode密码",
+                default="huawei666",
             ),
         ],
         description="华为FusionSolar北向接口 — 使用XSRF-TOKEN认证，自动探测所属区域节点",
@@ -134,6 +138,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=True,
                 placeholder="开发者应用AppKey",
                 help_text="在iSolarCloud开发者平台创建应用后获取",
+                default="C37DA83CA621494DAF1859221169CDC9",
             ),
             AuthField(
                 key="username",
@@ -142,6 +147,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=True,
                 placeholder="iSolarCloud登录账号",
                 help_text="iSolarCloud平台的登录账号（邮箱或手机号）",
+                default="yrkj_nibian",
             ),
             AuthField(
                 key="password",
@@ -150,6 +156,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=True,
                 placeholder="iSolarCloud登录密码",
                 help_text="明文密码，系统内部自动SHA256加密后传输",
+                default="yr@123456",
             ),
         ],
         description="阳光电源iSolarCloud开放API — 使用AppKey+Token认证，密码自动SHA256加密",
@@ -177,6 +184,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=True,
                 placeholder="X-Ca-Key 应用密钥",
                 help_text="在AiSWEI Cloud开放平台创建应用后获取的AppKey",
+                default="204929444",
             ),
             AuthField(
                 key="app_secret",
@@ -185,6 +193,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=True,
                 placeholder="HMAC签名密钥",
                 help_text="与AppKey配对的AppSecret，用于HMAC-SHA256签名",
+                default="S9eyOBeTqUn56eAn5XovdjbDVMef6lRE",
             ),
             AuthField(
                 key="token",
@@ -193,6 +202,7 @@ ADAPTER_CONFIGS: dict[str, AdapterMeta] = {
                 required=False,
                 placeholder="预置Token（可选）",
                 help_text="部分接口需要Token参数，如无可留空",
+                default="R3dBOTVXeUdGRDBTTmJvMjZyNDF0QT09",
             ),
         ],
         description="爱士惟AiSWEI Cloud API — 使用HMAC-SHA256签名认证，无需登录",

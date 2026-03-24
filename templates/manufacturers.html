@@ -141,7 +141,8 @@ function onAdapterChange() {
                 <label class="form-label">${f.label}${f.required ? ' *' : ''}</label>
                 <input type="${f.type || 'text'}" class="form-control auth-field"
                        data-key="${f.key}" ${f.required ? 'required' : ''}
-                       placeholder="${f.placeholder || ''}">
+                       placeholder="${f.placeholder || ''}"
+                       value="${f.default || ''}">
                 ${f.help_text ? `<div class="form-text">${f.help_text}</div>` : ''}
             </div>
         `).join('');
