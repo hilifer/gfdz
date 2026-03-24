@@ -1,0 +1,15 @@
+services:
+  gfdz:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+      - /app/frontend/.nuxt
+
+volumes:
+  pgdata:
