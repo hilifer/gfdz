@@ -46,6 +46,15 @@ _DEFAULT_MANUFACTURERS = [
             "password": "yr@123456",
         },
     },
+    {
+        "code": "solis",
+        "name": "锦浪Solis",
+        "api_base_url": "https://api.ginlong.com:13333",
+        "auth_config": {
+            "api_id": "",
+            "api_secret": "",
+        },
+    },
 ]
 
 

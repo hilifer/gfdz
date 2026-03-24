@@ -302,6 +302,156 @@ class AisweiAdapter(BaseAdapter):
 
         return alarms
 
+    # ------------------------------------------------------------------
+    # Extended read-only API endpoints
+    # ------------------------------------------------------------------
+
+    async def get_station_output(
+        self, apikey: str, period: str, date: str | None = None,
+    ) -> dict:
+        """getPlantOutputPro — station output time-series.
+
+        Args:
+            apikey: station API key (station_code).
+            period: one of 'bydays', 'bymonth', 'byyear', 'bytotal'.
+            date: date string whose format depends on *period*
+                  (e.g. 'yyyy-MM-dd' for bydays, 'yyyy-MM' for bymonth,
+                  'yyyy' for byyear).  Optional for 'bytotal'.
+
+        Returns:
+            Raw API response body (data.result[], data.dataunit).
+        """
+        params: dict = {"apikey": apikey, "period": period}
+        if date is not None:
+            params["date"] = date
+        return await self._get("/pro/getPlantOutputPro", params)
+
+    async def get_inverter_data_page(
+        self,
+        apikey: str,
+        isn: str,
+        sdt: str,
+        edt: str,
+        page: int = 1,
+        size: int = 20,
+    ) -> dict:
+        """getInverterDataPagePro — paginated inverter time-series data.
+
+        Args:
+            apikey: station API key.
+            isn: inverter serial number.
+            sdt: start time 'yyyy-MM-dd HH:mm:ss'.
+            edt: end time 'yyyy-MM-dd HH:mm:ss'.
+            page: page number (1-based).
+            size: page size.
+        """
+        return await self._get("/pro/getInverterDataPagePro", {
+            "apikey": apikey,
+            "isn": isn,
+            "sdt": sdt,
+            "edt": edt,
+            "pageNum": page,
+            "pageSize": size,
+        })
+
+    async def get_inverter_etoday(self, isn: str, date: str) -> dict:
+        """getInverterETodayPro — inverter daily energy.
+
+        Args:
+            isn: inverter serial number.
+            date: date string 'yyyy-MM-dd'.
+        """
+        return await self._get("/pro/getInverterETodayPro", {
+            "isn": isn,
+            "date": date,
+        })
+
+    async def get_inverter_history_errors(
+        self,
+        apikey: str,
+        isn: str,
+        sdt: str,
+        edt: str,
+        page: int = 1,
+        size: int = 20,
+    ) -> dict:
+        """getInverterHisErrorPagePro — paginated historical inverter errors.
+
+        Args:
+            apikey: station API key.
+            isn: inverter serial number.
+            sdt: start time 'yyyy-MM-dd HH:mm:ss'.
+            edt: end time 'yyyy-MM-dd HH:mm:ss'.
+            page: page number (1-based).
+            size: page size.
+        """
+        return await self._get("/pro/getInverterHisErrorPagePro", {
+            "apikey": apikey,
+            "isn": isn,
+            "sdt": sdt,
+            "edt": edt,
+            "pageNum": page,
+            "pageSize": size,
+        })
+
+    async def get_inverter_overview(self, isn: str) -> dict:
+        """getInverterOverviewPro — inverter overview (energy, CO2, etc.).
+
+        Args:
+            isn: inverter serial number.
+        """
+        return await self._get("/pro/getInverterOverviewPro", {"isn": isn})
+
+    async def get_inverter_output(
+        self, isn: str, period: str, date: str | None = None,
+    ) -> dict:
+        """getInverterOutputPro — inverter output time-series.
+
+        Args:
+            isn: inverter serial number.
+            period: one of 'bydays', 'bymonth', 'byyear', 'bytotal'.
+            date: date string whose format depends on *period*.
+        """
+        params: dict = {"isn": isn, "period": period}
+        if date is not None:
+            params["date"] = date
+        return await self._get("/pro/getInverterOutputPro", params)
+
+    async def get_inverter_detail(self, isn: str) -> dict:
+        """getInverterDetail — inverter basic info.
+
+        Args:
+            isn: inverter serial number.
+        """
+        return await self._get("/pro/getInverterDetail", {"isn": isn})
+
+    async def get_user_detail(self) -> dict:
+        """getUserDetail — current user / station basic info."""
+        return await self._get("/pro/getUserDetail")
+
+    async def get_collector_location(self, psno: str) -> dict:
+        """getLocationPro — collector location (address, longitude, latitude).
+
+        Args:
+            psno: collector serial number.
+
+        Returns:
+            Raw response with address, jd (longitude), wd (latitude).
+        """
+        return await self._get("/pro/getLocationPro", {"psno": psno})
+
+    async def get_inverter_recover_status(self, isn: str, event_id: str) -> dict:
+        """getInverterRecoverStatusPro — check if an inverter error has recovered.
+
+        Args:
+            isn: inverter serial number.
+            event_id: the event/error ID to check.
+        """
+        return await self._get("/pro/getInverterRecoverStatusPro", {
+            "isn": isn,
+            "eventId": event_id,
+        })
+
     async def close(self) -> None:
         if self._client and not self._client.is_closed:
             await self._client.aclose()

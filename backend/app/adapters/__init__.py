@@ -14,6 +14,7 @@ from app.adapters.base import (
 from app.adapters.huawei import HuaweiAdapter
 from app.adapters.aiswei import AisweiAdapter
 from app.adapters.sungrow import SungrowAdapter
+from app.adapters.solis import SolisAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ __all__ = [
     "HuaweiAdapter",
     "AisweiAdapter",
     "SungrowAdapter",
+    "SolisAdapter",
     "get_adapter",
     "register_adapter",
 ]
@@ -37,6 +39,7 @@ _ADAPTER_REGISTRY: dict[str, type[BaseAdapter]] = {
     "huawei": HuaweiAdapter,
     "aiswei": AisweiAdapter,
     "sungrow": SungrowAdapter,
+    "solis": SolisAdapter,
 }
 
 

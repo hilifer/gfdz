@@ -83,7 +83,7 @@
 <script setup lang="ts">
 const route = useRoute();
 const api = useApi();
-const { user, logout } = useAuth();
+const { user, logout, fetchUser, isLoggedIn } = useAuth();
 
 const alarmCount = ref(0);
 const currentTime = ref("");

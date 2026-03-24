@@ -1,7 +1,12 @@
 <template>
   <div>
     <NuxtLayout name="auth">
-      <div class="w-full max-w-md">
+      <!-- Loading spinner while validating existing token -->
+      <div v-if="checking" class="text-center text-gray-400">
+        <i class="pi pi-spin pi-spinner text-3xl"></i>
+        <p class="mt-3 text-sm">验证登录状态...</p>
+      </div>
+      <div v-else class="w-full max-w-md">
         <div class="bg-white rounded-2xl shadow-xl p-8">
           <!-- Logo -->
           <div class="text-center mb-8">
@@ -53,10 +58,27 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 
-const { login } = useAuth();
+const { login, isLoggedIn, fetchUser } = useAuth();
 const form = reactive({ username: "", password: "" });
 const loading = ref(false);
 const error = ref("");
+const checking = ref(true);
+
+// On mount, if token already exists and is valid, skip login page
+onMounted(async () => {
+  if (isLoggedIn.value) {
+    try {
+      const u = await fetchUser();
+      if (u) {
+        navigateTo("/");
+        return;
+      }
+    } catch {
+      // token invalid, stay on login page
+    }
+  }
+  checking.value = false;
+});
 
 async function handleLogin() {
   error.value = "";

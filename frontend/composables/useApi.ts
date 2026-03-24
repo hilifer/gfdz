@@ -1,11 +1,17 @@
 /**
  * API 请求封装
+ *
+ * - Attaches the Bearer token from the "token" cookie.
+ * - On 401, clears the token and redirects to /login **once** (avoids loops).
  */
 export function useApi() {
   const config = useRuntimeConfig();
   const token = useCookie("token");
 
   const baseURL = config.public.apiBase;
+
+  // Simple guard so a burst of 401s only triggers one redirect
+  let redirecting = false;
 
   async function request<T = any>(
     url: string,
@@ -31,10 +37,16 @@ export function useApi() {
 
       return res;
     } catch (error: any) {
-      // Global 401 handling: clear token and redirect to login
-      if (error?.response?.status === 401 || error?.status === 401 || error?.statusCode === 401) {
+      const status =
+        error?.response?.status ?? error?.status ?? error?.statusCode;
+
+      // Global 401 handling: clear token and redirect to login (once)
+      if (status === 401 && !redirecting) {
+        redirecting = true;
         token.value = null;
-        navigateTo("/login");
+        // Use nextTick to avoid interrupting current render cycle
+        await navigateTo("/login");
+        redirecting = false;
       }
       throw error;
     }

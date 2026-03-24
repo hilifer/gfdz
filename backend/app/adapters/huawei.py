@@ -251,6 +251,140 @@ class HuaweiAdapter(BaseAdapter):
             )
         return alarms
 
+    # ------------------------------------------------------------------
+    # Additional read-only KPI endpoints (Huawei SmartPVMS V6)
+    # ------------------------------------------------------------------
+
+    async def get_station_hourly(self, station_codes: list, collect_time: int) -> dict:
+        """获取电站小时数据 (hourly generation data).
+
+        Args:
+            station_codes: List of station codes.
+            collect_time: Timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getKpiStationHour",
+            {"stationCodes": ",".join(str(c) for c in station_codes), "collectTime": collect_time},
+        )
+
+    async def get_station_monthly(self, station_codes: list, collect_time: int) -> dict:
+        """获取电站月数据 (monthly generation data).
+
+        Args:
+            station_codes: List of station codes.
+            collect_time: Timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getKpiStationMonth",
+            {"stationCodes": ",".join(str(c) for c in station_codes), "collectTime": collect_time},
+        )
+
+    async def get_station_yearly(self, station_codes: list, collect_time: int) -> dict:
+        """获取电站年数据 (yearly generation data).
+
+        Args:
+            station_codes: List of station codes.
+            collect_time: Timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getKpiStationYear",
+            {"stationCodes": ",".join(str(c) for c in station_codes), "collectTime": collect_time},
+        )
+
+    async def get_device_history(
+        self, device_id: int, device_type_id: int, start_time: int, end_time: int
+    ) -> dict:
+        """获取设备历史数据 (device history KPI).
+
+        Args:
+            device_id: Device ID.
+            device_type_id: Device type ID (e.g. 1 for inverter).
+            start_time: Start timestamp in milliseconds.
+            end_time: End timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getDevHistoryKpi",
+            {
+                "devIds": str(device_id),
+                "devTypeId": device_type_id,
+                "startTime": start_time,
+                "endTime": end_time,
+            },
+        )
+
+    async def get_device_daily(self, device_id: int, device_type_id: int, collect_time: int) -> dict:
+        """获取设备日数据 (device daily KPI).
+
+        Args:
+            device_id: Device ID.
+            device_type_id: Device type ID.
+            collect_time: Timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getDevKpiDay",
+            {"devIds": str(device_id), "devTypeId": device_type_id, "collectTime": collect_time},
+        )
+
+    async def get_device_monthly(self, device_id: int, device_type_id: int, collect_time: int) -> dict:
+        """获取设备月数据 (device monthly KPI).
+
+        Args:
+            device_id: Device ID.
+            device_type_id: Device type ID.
+            collect_time: Timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getDevKpiMonth",
+            {"devIds": str(device_id), "devTypeId": device_type_id, "collectTime": collect_time},
+        )
+
+    async def get_device_yearly(self, device_id: int, device_type_id: int, collect_time: int) -> dict:
+        """获取设备年数据 (device yearly KPI).
+
+        Args:
+            device_id: Device ID.
+            device_type_id: Device type ID.
+            collect_time: Timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getDevKpiYear",
+            {"devIds": str(device_id), "devTypeId": device_type_id, "collectTime": collect_time},
+        )
+
+    async def get_device_5min(
+        self, device_id: int, device_type_id: int, collect_time: int, start_time: int, end_time: int
+    ) -> dict:
+        """获取设备5分钟历史数据 (device 5-minute granularity data).
+
+        Args:
+            device_id: Device ID.
+            device_type_id: Device type ID.
+            collect_time: Timestamp in milliseconds.
+            start_time: Start timestamp in milliseconds.
+            end_time: End timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getDevFiveMinutes",
+            {
+                "devIds": str(device_id),
+                "devTypeId": device_type_id,
+                "collectTime": collect_time,
+                "startTime": start_time,
+                "endTime": end_time,
+            },
+        )
+
+    async def get_station_list_history(self, collect_time: int) -> dict:
+        """获取电站列表（含历史时间参数）(station list with time filter).
+
+        Args:
+            collect_time: Timestamp in milliseconds.
+        """
+        return await self._post(
+            "/thirdData/getStationList",
+            {"pageNo": 1, "collectTime": collect_time},
+        )
+
     async def close(self) -> None:
         if self._xsrf_token:
             try:

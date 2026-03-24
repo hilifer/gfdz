@@ -51,7 +51,11 @@ class SungrowAdapter(BaseAdapter):
             self._client = httpx.AsyncClient(
                 base_url=self.api_base_url,
                 timeout=httpx.Timeout(30.0, connect=10.0),
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    "sys_code": "901",
+                    "x-access-key": self._appkey,
+                },
             )
         return self._client
 
@@ -127,7 +131,7 @@ class SungrowAdapter(BaseAdapter):
         page_no = 1
         page_size = 100
         while True:
-            body = await self._post("/openapi/getPlantList", {
+            body = await self._post("/openapi/getPowerStationList", {
                 "curPage": str(page_no),
                 "size": str(page_size),
             })
@@ -208,8 +212,21 @@ class SungrowAdapter(BaseAdapter):
             equivalent_hours=_safe_float(rec.get("equivalent_hours") or rec.get("full_hours")),
         )
 
-    async def get_device_list(self, station_code: str) -> list[DeviceInfo]:
-        body = await self._post("/openapi/getDeviceList", {"ps_id": station_code})
+    async def get_device_list(
+        self,
+        station_code: str,
+        device_type_list: list[int] | None = None,
+        page: int = 1,
+        size: int = 100,
+    ) -> list[DeviceInfo]:
+        params: dict = {
+            "ps_id": station_code,
+            "curPage": str(page),
+            "size": str(size),
+        }
+        if device_type_list is not None:
+            params["device_type_list"] = device_type_list
+        body = await self._post("/openapi/getDeviceList", params)
         result_data = body.get("result_data") or {}
         items = result_data.get("pageList") or result_data.get("list") or []
         devices: list[DeviceInfo] = []
@@ -221,10 +238,12 @@ class SungrowAdapter(BaseAdapter):
                     device_name=d.get("device_name") or d.get("dev_name", ""),
                     device_type=_normalise_device_type(dev_type_raw),
                     brand="sungrow",
-                    model=d.get("device_model") or d.get("dev_model"),
+                    model=d.get("device_model") or d.get("dev_model") or d.get("device_model_code"),
                     serial_number=d.get("sn") or d.get("serial_number"),
                     rated_power=_safe_float(d.get("rated_power")),
-                    status=_map_status(d.get("device_status") or d.get("status")),
+                    status=_map_status(
+                        d.get("dev_status") or d.get("device_status") or d.get("status")
+                    ),
                 )
             )
         return devices
@@ -251,11 +270,84 @@ class SungrowAdapter(BaseAdapter):
             raw_data=data,
         )
 
+    # ------------------------------------------------------------------
+    # Extended read-only API endpoints
+    # ------------------------------------------------------------------
+
+    async def get_station_realtime_data(self, ps_id: str, points: list[str]) -> dict:
+        """Query real-time station data by data-point names.
+
+        Args:
+            ps_id: power station ID.
+            points: list of point / KPI identifiers to query.
+
+        Returns:
+            Raw API response body.
+        """
+        return await self._post("/openapi/getStationRealKpi", {
+            "ps_id": ps_id,
+            "points": ",".join(points) if isinstance(points, list) else points,
+        })
+
+    async def get_device_realtime_data(self, device_sn: str, points: list[str]) -> dict:
+        """Query real-time device data by data-point names.
+
+        Args:
+            device_sn: device serial number.
+            points: list of point / KPI identifiers to query.
+
+        Returns:
+            Raw API response body.
+        """
+        return await self._post("/openapi/getDeviceRealKpi", {
+            "device_sn": device_sn,
+            "points": ",".join(points) if isinstance(points, list) else points,
+        })
+
+    async def get_station_daily_report(self, ps_id: str, date: str) -> dict:
+        """Get daily generation report for a station.
+
+        Args:
+            ps_id: power station ID.
+            date: date string 'yyyyMMdd'.
+
+        Returns:
+            Raw API response body with daily generation data.
+        """
+        return await self._post("/openapi/queryPsDataByDay", {
+            "ps_id": ps_id,
+            "date": date,
+        })
+
+    async def get_alarm_list(
+        self,
+        ps_id_list: list[str] | None = None,
+        page: int = 1,
+        size: int = 20,
+    ) -> dict:
+        """getAlarmList — paginated alarm list with optional station filter.
+
+        Args:
+            ps_id_list: list of station IDs to filter (optional).
+            page: page number (1-based).
+            size: page size.
+
+        Returns:
+            Raw API response body.
+        """
+        params: dict = {
+            "curPage": str(page),
+            "size": str(size),
+        }
+        if ps_id_list is not None:
+            params["ps_id_list"] = ps_id_list
+        return await self._post("/openapi/getAlarmList", params)
+
     async def get_alarms(self, station_code: str) -> list[AlarmInfo]:
         body = await self._post("/openapi/getAlarmList", {
             "ps_id": station_code,
-            "page_no": "1",
-            "page_size": "100",
+            "curPage": "1",
+            "size": "100",
         })
         result_data = body.get("result_data") or {}
         items = result_data.get("pageList") or result_data.get("list") or []
