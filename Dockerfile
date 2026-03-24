@@ -12,28 +12,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# 初始化 PostgreSQL 数据库
+# 初始化 PostgreSQL
 USER postgres
 RUN /usr/lib/postgresql/*/bin/initdb -D /var/lib/postgresql/data && \
     echo "host all all 0.0.0.0/0 md5" >> /var/lib/postgresql/data/pg_hba.conf && \
     echo "listen_addresses='*'" >> /var/lib/postgresql/data/postgresql.conf
 USER root
 
-# 安装后端依赖
+# 安装后端 Python 依赖
 WORKDIR /app/backend
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 安装前端依赖并构建
+# 安装前端 Node 依赖
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
-COPY frontend/ .
-RUN npm run build
 
-# 复制后端代码
-WORKDIR /app/backend
-COPY backend/ .
+# 复制全部源码
+COPY backend/ /app/backend/
+COPY frontend/ /app/frontend/
 
 # Nginx 配置
 COPY nginx/nginx.conf /etc/nginx/nginx.conf

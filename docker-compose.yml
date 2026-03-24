@@ -6,6 +6,9 @@ services:
       - "5001:80"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - frontend_node_modules:/app/frontend/node_modules
     environment:
       POSTGRES_DB: gfdz
       POSTGRES_USER: gfdz
@@ -15,7 +18,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-in-production}
       JWT_ALGORITHM: HS256
       JWT_EXPIRE_MINUTES: 1440
-      PG_MAJOR: "15"
+      NUXT_PUBLIC_API_BASE: /api
 
 volumes:
   pgdata:
+  frontend_node_modules:

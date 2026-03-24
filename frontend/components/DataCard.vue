@@ -12,7 +12,7 @@
         class="w-12 h-12 rounded-lg flex items-center justify-center"
         :class="bgColor"
       >
-        <i :class="icon" class="text-xl" :class="iconColor"></i>
+        <i :class="[icon, 'text-xl', iconColor]"></i>
       </div>
     </div>
   </div>
