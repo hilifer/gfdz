@@ -23,7 +23,13 @@ _TOKEN_TTL_SECONDS = 100 * 60
 
 
 class SungrowAdapter(BaseAdapter):
-    """Sungrow iSolarCloud OpenAPI adapter."""
+    """Sungrow iSolarCloud OpenAPI adapter.
+
+    Default API base: https://gateway.isolarcloud.com/openapi
+    auth_config keys: appkey, secret, username, password
+    """
+
+    MANUFACTURER = "sungrow"
 
     def __init__(self, api_base_url: str, auth_config: dict):
         super().__init__(api_base_url, auth_config)
