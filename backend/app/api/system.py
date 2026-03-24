@@ -1,5 +1,8 @@
 """系统设置接口"""
-from fastapi import APIRouter, Depends, Query
+import logging
+from enum import Enum
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +11,8 @@ from app.database import get_db
 from app.dependencies import get_current_user, require_role, hash_password
 from app.models.user import User
 from app.models.sync_log import SyncLog
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -80,3 +85,70 @@ async def list_sync_logs(
             for log in result.scalars().all()
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# 手动同步触发
+# ---------------------------------------------------------------------------
+
+class SyncType(str, Enum):
+    full = "full"
+    stations = "stations"
+    realtime = "realtime"
+    daily = "daily"
+    devices = "devices"
+    alarms = "alarms"
+
+
+class SyncRequest(BaseModel):
+    sync_type: SyncType = SyncType.full
+
+
+@router.post("/sync")
+async def trigger_manual_sync(
+    body: SyncRequest = SyncRequest(),
+    user=Depends(require_role("admin")),
+):
+    """手动触发数据同步（仅管理员）。
+
+    将同步任务提交到 Celery 后台执行，立即返回 task_id。
+    支持的 sync_type: full / stations / realtime / daily / devices / alarms
+    """
+    from app.tasks.sync_tasks import (
+        run_full_sync_task,
+        sync_all_stations_task,
+        sync_all_realtime,
+        sync_all_daily,
+        sync_all_devices_task,
+        sync_all_alarms,
+    )
+
+    task_map = {
+        SyncType.full: run_full_sync_task,
+        SyncType.stations: sync_all_stations_task,
+        SyncType.realtime: sync_all_realtime,
+        SyncType.daily: sync_all_daily,
+        SyncType.devices: sync_all_devices_task,
+        SyncType.alarms: sync_all_alarms,
+    }
+
+    task_func = task_map.get(body.sync_type)
+    if task_func is None:
+        raise HTTPException(status_code=400, detail=f"未知的同步类型: {body.sync_type}")
+
+    try:
+        result = task_func.delay()
+        logger.info(
+            "手动同步已触发: type=%s, task_id=%s, operator=%s",
+            body.sync_type.value,
+            result.id,
+            user.username,
+        )
+        return {
+            "ok": True,
+            "message": f"同步任务已提交: {body.sync_type.value}",
+            "task_id": result.id,
+        }
+    except Exception as exc:
+        logger.error("提交同步任务失败: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"提交同步任务失败: {exc}")

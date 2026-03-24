@@ -20,15 +20,24 @@ export function useApi() {
       headers["Authorization"] = `Bearer ${token.value}`;
     }
 
-    const res = await $fetch<T>(url, {
-      baseURL,
-      method: (options.method || "GET") as any,
-      headers,
-      body: options.body,
-      params: options.params,
-    });
+    try {
+      const res = await $fetch<T>(url, {
+        baseURL,
+        method: (options.method || "GET") as any,
+        headers,
+        body: options.body,
+        params: options.params,
+      });
 
-    return res;
+      return res;
+    } catch (error: any) {
+      // Global 401 handling: clear token and redirect to login
+      if (error?.response?.status === 401 || error?.status === 401 || error?.statusCode === 401) {
+        token.value = null;
+        navigateTo("/login");
+      }
+      throw error;
+    }
   }
 
   return {

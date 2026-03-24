@@ -82,10 +82,14 @@
 
 <script setup lang="ts">
 const route = useRoute();
+const api = useApi();
 const { user, logout } = useAuth();
 
 const alarmCount = ref(0);
 const currentTime = ref("");
+
+let timeTimer: ReturnType<typeof setInterval> | null = null;
+let alarmTimer: ReturnType<typeof setInterval> | null = null;
 
 const menuItems = [
   { path: "/", label: "总览大屏", icon: "pi pi-chart-bar" },
@@ -112,7 +116,16 @@ function handleLogout() {
   logout();
 }
 
-// 时间更新
+async function fetchAlarmCount() {
+  try {
+    const stats = await api.get<any>("/alarms/stats");
+    alarmCount.value = stats.total_active ?? 0;
+  } catch (e) {
+    console.error("获取告警数量失败", e);
+  }
+}
+
+// 时间更新 + 告警轮询
 onMounted(() => {
   const update = () => {
     const now = new Date();
@@ -122,6 +135,15 @@ onMounted(() => {
     });
   };
   update();
-  setInterval(update, 1000);
+  timeTimer = setInterval(update, 1000);
+
+  // Fetch alarm count immediately, then every 60 seconds
+  fetchAlarmCount();
+  alarmTimer = setInterval(fetchAlarmCount, 60000);
+});
+
+onUnmounted(() => {
+  if (timeTimer) clearInterval(timeTimer);
+  if (alarmTimer) clearInterval(alarmTimer);
 });
 </script>

@@ -1,5 +1,8 @@
 <template>
-  <div v-if="device">
+  <div v-if="errorMsg" class="flex items-center justify-center h-64">
+    <p class="text-red-500">{{ errorMsg }}</p>
+  </div>
+  <div v-else-if="device">
     <div class="flex items-center space-x-3 mb-6">
       <NuxtLink to="/devices" class="text-gray-400 hover:text-gray-600">
         <i class="pi pi-arrow-left text-lg"></i>
@@ -32,8 +35,14 @@
 const route = useRoute();
 const api = useApi();
 const device = ref<any>(null);
+const errorMsg = ref("");
 
 onMounted(async () => {
-  device.value = await api.get(`/devices/${route.params.id}`);
+  try {
+    device.value = await api.get(`/devices/${route.params.id}`);
+  } catch (e: any) {
+    console.error("获取设备详情失败", e);
+    errorMsg.value = "获取设备详情失败，请返回重试";
+  }
 });
 </script>

@@ -7,6 +7,9 @@
       </button>
     </div>
 
+    <!-- 错误提示 -->
+    <div v-if="errorMsg" class="bg-red-50 text-red-600 rounded-xl p-4 mb-6 text-sm">{{ errorMsg }}</div>
+
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
       <table class="w-full text-sm">
         <thead class="bg-gray-50 text-gray-500">
@@ -32,6 +35,9 @@
             </td>
             <td class="px-4 py-3 text-gray-400 text-xs">{{ u.last_login_at || '-' }}</td>
           </tr>
+          <tr v-if="users.length === 0">
+            <td colspan="6" class="px-4 py-8 text-center text-gray-400">暂无用户</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -41,12 +47,22 @@
 <script setup lang="ts">
 const api = useApi();
 const users = ref<any[]>([]);
+const errorMsg = ref("");
 
 function roleLabel(r: string) {
   return { admin: "管理员", operator: "运维员", viewer: "查看者" }[r] || r;
 }
 
-onMounted(async () => {
-  users.value = await api.get("/system/users");
-});
+async function fetchUsers() {
+  try {
+    errorMsg.value = "";
+    const res = await api.get<any>("/system/users");
+    users.value = Array.isArray(res) ? res : res.items || [];
+  } catch (e: any) {
+    console.error("获取用户列表失败", e);
+    errorMsg.value = "获取用户列表失败，请稍后重试";
+  }
+}
+
+onMounted(fetchUsers);
 </script>

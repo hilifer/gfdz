@@ -27,6 +27,9 @@
       <button @click="fetchAlarms" class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600">查询</button>
     </div>
 
+    <!-- 错误提示 -->
+    <div v-if="errorMsg" class="bg-red-50 text-red-600 rounded-xl p-4 mb-6 text-sm">{{ errorMsg }}</div>
+
     <!-- 列表 -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
       <table class="w-full text-sm">
@@ -74,23 +77,39 @@ const alarms = ref<any[]>([]);
 const stats = ref({ critical: 0, warning: 0, info: 0, total_active: 0 });
 const filterLevel = ref("");
 const filterStatus = ref("");
+const errorMsg = ref("");
 
 async function fetchAlarms() {
-  const params: any = { page: 1, page_size: 100 };
-  if (filterLevel.value) params.alarm_level = filterLevel.value;
-  if (filterStatus.value) params.status = filterStatus.value;
-  const res = await api.get("/alarms", params);
-  alarms.value = res.items || [];
+  try {
+    errorMsg.value = "";
+    const params: any = { page: 1, page_size: 100 };
+    if (filterLevel.value) params.alarm_level = filterLevel.value;
+    if (filterStatus.value) params.status = filterStatus.value;
+    const res = await api.get("/alarms", params);
+    alarms.value = res.items || [];
+  } catch (e: any) {
+    console.error("获取告警列表失败", e);
+    errorMsg.value = "获取告警列表失败，请稍后重试";
+  }
 }
 
 async function fetchStats() {
-  stats.value = await api.get("/alarms/stats");
+  try {
+    stats.value = await api.get("/alarms/stats");
+  } catch (e: any) {
+    console.error("获取告警统计失败", e);
+  }
 }
 
 async function confirmAlarm(id: number) {
-  await api.post(`/alarms/${id}/confirm`);
-  fetchAlarms();
-  fetchStats();
+  try {
+    await api.post(`/alarms/${id}/confirm`);
+    fetchAlarms();
+    fetchStats();
+  } catch (e: any) {
+    console.error("确认告警失败", e);
+    errorMsg.value = "确认告警失败，请稍后重试";
+  }
 }
 
 onMounted(() => {

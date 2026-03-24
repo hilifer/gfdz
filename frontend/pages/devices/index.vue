@@ -21,6 +21,9 @@
       <button @click="fetchDevices" class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600">查询</button>
     </div>
 
+    <!-- 错误提示 -->
+    <div v-if="errorMsg" class="bg-red-50 text-red-600 rounded-xl p-4 mb-6 text-sm">{{ errorMsg }}</div>
+
     <!-- 表格 -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
       <table class="w-full text-sm">
@@ -61,17 +64,24 @@ const api = useApi();
 const devices = ref<any[]>([]);
 const filterType = ref("");
 const filterStatus = ref("");
+const errorMsg = ref("");
 
 function typeLabel(t: string) {
   return { inverter: "逆变器", meter: "电表", combiner_box: "汇流箱", weather_station: "气象站", storage: "储能" }[t] || t;
 }
 
 async function fetchDevices() {
-  const params: any = { page: 1, page_size: 100 };
-  if (filterType.value) params.device_type = filterType.value;
-  if (filterStatus.value) params.status = filterStatus.value;
-  const res = await api.get("/devices", params);
-  devices.value = res.items || [];
+  try {
+    errorMsg.value = "";
+    const params: any = { page: 1, page_size: 100 };
+    if (filterType.value) params.device_type = filterType.value;
+    if (filterStatus.value) params.status = filterStatus.value;
+    const res = await api.get("/devices", params);
+    devices.value = res.items || [];
+  } catch (e: any) {
+    console.error("获取设备列表失败", e);
+    errorMsg.value = "获取设备列表失败，请稍后重试";
+  }
 }
 
 onMounted(fetchDevices);
