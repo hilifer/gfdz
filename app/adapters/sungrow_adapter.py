@@ -27,6 +27,7 @@ class SungrowAdapter(BaseAdapter):
     def __init__(self, api_base_url: str, auth_config: dict | None = None, extra_params: dict | None = None):
         super().__init__(api_base_url, auth_config, extra_params)
         self._app_key = self.auth_config.get("app_key", "")
+        self._secret_key = self.auth_config.get("secret_key", "")
         self._user_account = self.auth_config.get("username", "")
         self._user_password = self.auth_config.get("password", "")
         self._access_token: str | None = None

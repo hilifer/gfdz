@@ -149,16 +149,28 @@ class HuaweiAdapter(BaseAdapter):
         return True
 
     async def get_station_list(self) -> list[StationInfo]:
-        result = await self._request("getStationList", {})
+        """获取电站列表（V6新接口 /thirdData/stations，分页获取全部）"""
         stations = []
-        for item in result.get("data", []):
-            stations.append(StationInfo(
-                station_code=item.get("stationCode", ""),
-                name=item.get("stationName", ""),
-                capacity=item.get("capacity"),
-                status=self._map_status(item.get("stationStatus")),
-                extra=item,
-            ))
+        page = 1
+
+        while True:
+            result = await self._request("stations", {"pageNo": page})
+            data = result.get("data", {})
+            for item in data.get("list", []):
+                stations.append(StationInfo(
+                    station_code=item.get("plantCode", ""),
+                    name=item.get("plantName", ""),
+                    capacity=item.get("capacity"),
+                    status="normal",
+                    extra=item,
+                ))
+
+            total = data.get("total", 0)
+            page_size = data.get("pageSize", 100)
+            if page * page_size >= total:
+                break
+            page += 1
+
         return stations
 
     async def get_station_realtime(self, station_code: str) -> GenerationRecord | None:
@@ -173,10 +185,10 @@ class HuaweiAdapter(BaseAdapter):
         kpi = item.get("dataItemMap", {})
         return GenerationRecord(
             record_date=date.today(),
-            current_power=kpi.get("real_health_state"),
             daily_generation=kpi.get("day_power"),
             monthly_generation=kpi.get("month_power"),
             total_generation=kpi.get("total_power"),
+            daily_income=kpi.get("day_income"),
             raw_data=item,
         )
 
@@ -197,14 +209,21 @@ class HuaweiAdapter(BaseAdapter):
         return GenerationRecord(
             record_date=query_date,
             daily_generation=inverter_power,
-            daily_income=kpi.get("revenue"),
+            daily_income=kpi.get("power_profit"),
             equivalent_hours=(
                 inverter_power / installed_cap if installed_cap else None
             ),
+            pr_value=kpi.get("performance_ratio"),
             raw_data=item,
         )
 
     async def get_station_alarms(self, station_code: str) -> list[AlarmRecord]:
+        """获取设备告警（V6接口 getAlarmList）
+
+        请求参数: stationCodes(选填), sns(选填), beginTime(必填),
+                  endTime(必填), language(必填), levels(选填), devTypes(选填)
+        返回: data 直接是告警列表
+        """
         try:
             now = datetime.now()
             result = await self._request("getAlarmList", {
@@ -218,7 +237,11 @@ class HuaweiAdapter(BaseAdapter):
             return []
 
         alarms = []
-        for item in result.get("data", {}).get("list", []):
+        # data 直接是告警信息列表（非嵌套 data.list）
+        alarm_data = result.get("data", [])
+        if isinstance(alarm_data, dict):
+            alarm_data = alarm_data.get("list", [])
+        for item in alarm_data:
             alarms.append(AlarmRecord(
                 alarm_name=item.get("alarmName", "未知告警"),
                 alarm_time=datetime.fromtimestamp(item.get("raiseTime", 0) / 1000),
@@ -229,18 +252,20 @@ class HuaweiAdapter(BaseAdapter):
                     datetime.fromtimestamp(item["clearTime"] / 1000)
                     if item.get("clearTime") else None
                 ),
-                description=item.get("alarmCause", ""),
+                description=item.get("repairSuggestion", ""),
                 device_name=item.get("devName", ""),
             ))
         return alarms
 
     async def logout(self):
+        """注销接口，请求体需传 xsrfToken"""
         try:
             if self._xsrf_token:
                 await self._limiter.acquire("logout")
                 client = await self.get_client()
                 await client.post(
                     "/thirdData/logout",
+                    json={"xsrfToken": self._xsrf_token},
                     headers={"XSRF-TOKEN": self._xsrf_token},
                     cookies={"XSRF-TOKEN": self._xsrf_token},
                 )
@@ -259,8 +284,10 @@ class HuaweiAdapter(BaseAdapter):
 
     @staticmethod
     def _map_status(status_code) -> str:
-        return {1: "normal", 2: "fault", 3: "offline"}.get(status_code, "normal")
+        """电站实时健康状态: 1=正常, 2=故障, 3=离线"""
+        return {1: "normal", 2: "fault", 3: "offline"}.get(status_code, "unknown")
 
     @staticmethod
     def _map_alarm_level(severity) -> str:
+        """告警级别: 1=严重, 2=重要, 3=次要, 4=提示"""
         return {1: "critical", 2: "critical", 3: "warning", 4: "info"}.get(severity, "info")

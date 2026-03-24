@@ -254,12 +254,17 @@ class AisweiAdapter(BaseAdapter):
         )
 
     async def get_station_alarms(self, station_code: str) -> list[AlarmRecord]:
-        """获取电站告警/事件"""
+        """获取电站事件（getPlantEventPro）
+
+        必填参数: apikey, token, sdt(开始日期), edt(结束日期)
+        响应字段: eventCode, eventTime, eventType(1=消息,2=警告,3=错误), ssno
+        """
         try:
+            today = date.today()
             result = await self._request("getPlantEventPro", {
                 "apikey": station_code,
-                "pageNum": "1",
-                "pageSize": "50",
+                "sdt": today.strftime("%Y-%m-%d"),
+                "edt": today.strftime("%Y-%m-%d"),
             })
         except Exception as e:
             logger.warning(f"爱士惟告警接口调用失败: {e}")
@@ -268,20 +273,19 @@ class AisweiAdapter(BaseAdapter):
         alarms = []
         data = result.get("data", {})
         for item in data.get("result", []):
-            alarm_time_str = item.get("time", "")
+            alarm_time_str = item.get("eventTime", "")
             try:
                 alarm_time = datetime.strptime(alarm_time_str, "%Y-%m-%d %H:%M:%S")
             except ValueError:
                 alarm_time = datetime.now()
 
             alarms.append(AlarmRecord(
-                alarm_name=item.get("event", "未知事件"),
+                alarm_name=f"事件代码:{item.get('eventCode', '未知')}",
                 alarm_time=alarm_time,
-                alarm_code=item.get("code", ""),
-                alarm_level=self._map_event_level(item.get("level")),
-                status="active" if item.get("status") == 0 else "recovered",
-                description=item.get("description", ""),
-                device_name=item.get("sn", ""),
+                alarm_code=item.get("eventCode", ""),
+                alarm_level=self._map_event_level(item.get("eventType")),
+                status="active",
+                device_name=item.get("ssno", ""),
             ))
         return alarms
 
@@ -297,10 +301,17 @@ class AisweiAdapter(BaseAdapter):
 
     @staticmethod
     def _map_status(status) -> str:
-        mapping = {0: "offline", 1: "normal", 2: "fault", 3: "fault", 4: "normal"}
-        return mapping.get(status, "normal")
+        """电站状态: 0=离线, 1=正常, 2=警告, 3=错误, 4=部分离线"""
+        mapping = {0: "offline", 1: "normal", 2: "warning", 3: "fault", 4: "partial_offline"}
+        return mapping.get(status, "unknown")
 
     @staticmethod
-    def _map_event_level(level) -> str:
-        mapping = {0: "info", 1: "warning", 2: "critical", 3: "critical"}
-        return mapping.get(level, "info")
+    def _map_event_level(event_type) -> str:
+        """事件类型: 1=消息, 2=警告, 3=错误"""
+        mapping = {1: "info", 2: "warning", 3: "critical"}
+        if isinstance(event_type, str):
+            try:
+                event_type = int(event_type)
+            except ValueError:
+                return "info"
+        return mapping.get(event_type, "info")
