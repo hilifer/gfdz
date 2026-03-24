@@ -70,11 +70,11 @@ onMounted(async () => {
     try {
       const u = await fetchUser();
       if (u) {
-        navigateTo("/");
+        await navigateTo("/", { replace: true });
         return;
       }
     } catch {
-      // token invalid, stay on login page
+      // token invalid — fall through to show login form
     }
   }
   checking.value = false;
@@ -85,7 +85,7 @@ async function handleLogin() {
   loading.value = true;
   try {
     await login(form.username, form.password);
-    navigateTo("/");
+    await navigateTo("/", { replace: true });
   } catch (e: any) {
     error.value = e?.data?.detail || "登录失败";
   } finally {

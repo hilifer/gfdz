@@ -36,12 +36,17 @@ export function useAuth() {
    * Validate current token by fetching user profile.
    * If the token is invalid / expired, clear it silently
    * (the auth middleware will redirect to /login).
+   *
+   * Uses skipAuthRedirect so a 401 here does NOT trigger another
+   * redirect to /login (which would cause a loop on the login page).
    */
   async function fetchUser() {
     if (!token.value) return null;
     try {
       const api = useApi();
-      user.value = await api.get("/auth/me");
+      user.value = await api.get("/auth/me", undefined, {
+        skipAuthRedirect: true,
+      });
       return user.value;
     } catch {
       // Token invalid or expired — clear it without redirect loop

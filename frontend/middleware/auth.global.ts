@@ -3,28 +3,26 @@
  *
  * - Unauthenticated visitors are sent to /login.
  * - Authenticated visitors that land on /login are sent to /.
- * - A flag prevents redirect loops: if we already redirected once
- *   in this navigation cycle we let it through.
+ * - Uses abortNavigation() to prevent redirect loops.
  */
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware((to, _from) => {
   const token = useCookie("token");
+  const isLoginPage = to.path === "/login";
 
   // Allow the /login page when there is no token (normal case)
-  if (to.path === "/login" && !token.value) {
-    return; // allow
+  if (isLoginPage && !token.value) {
+    return; // allow — user needs to log in
   }
 
-  // If user is already logged in and tries to visit /login, redirect to dashboard
-  if (to.path === "/login" && token.value) {
-    return navigateTo("/");
+  // If user has a token and tries to visit /login, redirect to dashboard
+  if (isLoginPage && token.value) {
+    return navigateTo("/", { replace: true });
   }
 
-  // For all other pages, require authentication
-  if (to.path !== "/login" && !token.value) {
-    // Avoid redirect loops: if we are already coming from /login, don't redirect again
-    if (from && from.path === "/login") {
-      return;
-    }
-    return navigateTo("/login");
+  // For all other pages, require a token
+  if (!isLoginPage && !token.value) {
+    return navigateTo("/login", { replace: true });
   }
+
+  // Token present and not on /login — allow through
 });

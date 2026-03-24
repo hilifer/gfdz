@@ -1,5 +1,6 @@
 """厂家管理接口"""
 import json
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -9,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.dependencies import get_current_user, require_role
 from app.models.manufacturer import Manufacturer
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -75,3 +78,46 @@ async def update_manufacturer(mfr_id: int, data: ManufacturerUpdate, db: AsyncSe
         mfr.is_active = data.is_active
     await db.commit()
     return {"ok": True}
+
+
+@router.post("/{mfr_id}/sync")
+async def sync_manufacturer(
+    mfr_id: int,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(require_role("admin")),
+):
+    """触发单个厂家的完整同步（电站 + 设备 + 实时 + 日数据 + 告警）。
+
+    先尝试通过 Celery 异步执行；如果 Celery 不可用，则直接同步执行。
+    """
+    mfr = await db.get(Manufacturer, mfr_id)
+    if not mfr:
+        raise HTTPException(status_code=404, detail="厂家不存在")
+    if not mfr.is_active:
+        raise HTTPException(status_code=400, detail="该厂家已被禁用，请先启用")
+
+    # Try Celery first
+    try:
+        from app.tasks.sync_tasks import run_full_sync_task
+        result = run_full_sync_task.delay()
+        logger.info("厂家同步任务已提交到Celery: mfr_id=%d, task_id=%s", mfr_id, result.id)
+        return {
+            "ok": True,
+            "message": f"同步任务已提交: {mfr.name}",
+            "task_id": result.id,
+        }
+    except Exception as exc:
+        logger.warning("Celery不可用，执行直接同步: %s", exc)
+
+    # Fallback: run sync directly (blocking)
+    try:
+        from app.services.sync_service import run_full_sync
+        results = await run_full_sync()
+        return {
+            "ok": True,
+            "message": f"同步完成: {mfr.name}",
+            "results": results,
+        }
+    except Exception as exc:
+        logger.error("直接同步失败: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"同步失败: {exc}")

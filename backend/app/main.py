@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import engine, Base
-from app.api import auth, dashboard, stations, devices, alarms, manufacturers, work_orders, system
+from app.api import auth, dashboard, stations, devices, alarms, manufacturers, work_orders, system, data_query
 
 
 @asynccontextmanager
@@ -44,6 +44,7 @@ app.include_router(alarms.router, prefix="/api/alarms", tags=["告警"])
 app.include_router(manufacturers.router, prefix="/api/manufacturers", tags=["厂家"])
 app.include_router(work_orders.router, prefix="/api/work-orders", tags=["工单"])
 app.include_router(system.router, prefix="/api/system", tags=["系统"])
+app.include_router(data_query.router, prefix="/api/query", tags=["数据查询"])
 
 
 @app.get("/api/health")
