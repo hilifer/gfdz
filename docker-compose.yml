@@ -85,7 +85,7 @@ services:
       - /app/node_modules
       - /app/.nuxt
     environment:
-      NUXT_PUBLIC_API_BASE: http://backend:8000/api
+      NUXT_PUBLIC_API_BASE: /api
     command: npm run dev -- --host 0.0.0.0
 
   # Nginx 反向代理
