@@ -14,7 +14,7 @@ if [ ! -f "$PG_DATA/PG_VERSION" ]; then
     chmod 700 "$PG_DATA"
     su - postgres -c "$PG_BIN/initdb -D $PG_DATA --locale=en_US.UTF-8"
     echo "host all all 0.0.0.0/0 md5" >> "$PG_DATA/pg_hba.conf"
-    echo "listen_addresses='*'" >> "$PG_DATA/postgresql.conf"
+    echo "listen_addresses='localhost'" >> "$PG_DATA/postgresql.conf"
     echo "==> PostgreSQL initialized."
 fi
 

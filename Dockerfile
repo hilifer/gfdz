@@ -33,6 +33,11 @@ RUN npm install
 COPY backend/ /app/backend/
 COPY frontend/ /app/frontend/
 
+# 构建前端（生产模式）
+WORKDIR /app/frontend
+ENV NUXT_PUBLIC_API_BASE=/api
+RUN npm run build
+
 # Nginx 配置
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
