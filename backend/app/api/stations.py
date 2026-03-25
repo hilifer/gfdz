@@ -1,4 +1,6 @@
 """电站管理接口"""
+import asyncio
+import logging
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -13,7 +15,12 @@ from app.models.station import Station
 from app.models.station_data import StationRealtime, StationDaily
 from app.models.manufacturer import Manufacturer
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# 同步状态锁，避免多个请求同时触发同步
+_sync_lock = asyncio.Lock()
+_syncing = False
 
 
 class StationCreate(BaseModel):
@@ -53,7 +60,27 @@ async def list_stations(
     db: AsyncSession = Depends(get_db),
     _=Depends(get_current_user),
 ):
-    """电站列表 — 支持筛选和分页"""
+    """电站列表 — 支持筛选和分页，首次访问自动从各厂家平台同步数据"""
+    global _syncing
+
+    # 检查是否有电站数据，没有则自动从各厂家平台拉取
+    station_count = await db.scalar(select(func.count(Station.id)))
+    if station_count == 0 and not _syncing:
+        async with _sync_lock:
+            # double check
+            station_count = await db.scalar(select(func.count(Station.id)))
+            if station_count == 0:
+                _syncing = True
+                try:
+                    from app.services.sync_service import run_full_sync
+                    logger.info("首次访问，自动触发从各厂家平台同步数据...")
+                    results = await run_full_sync()
+                    logger.info("自动同步完成: %s", results)
+                except Exception as e:
+                    logger.error("自动同步失败: %s", e)
+                finally:
+                    _syncing = False
+
     query = (
         select(Station, StationRealtime, Manufacturer.name.label("manufacturer_name"))
         .outerjoin(StationRealtime, Station.id == StationRealtime.station_id)

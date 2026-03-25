@@ -41,11 +41,12 @@ async function loadStations() {
   let url = '/stations?page_size=100';
   if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
   if (status) url += `&status=${status}`;
+  const el = document.getElementById('station-list');
+  el.innerHTML = '<p class="text-center text-gray-400 py-8">正在从各厂家平台获取数据，请稍候...</p>';
   try {
     const res = await api(url);
     const list = res.items || [];
-    const el = document.getElementById('station-list');
-    if (list.length === 0) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无电站数据</p>'; return; }
+    if (list.length === 0) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无电站数据，请检查厂家配置和网络连接</p>'; return; }
     if (currentView === 'card') {
       el.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">' +
         list.map(s => `
