@@ -28,7 +28,7 @@ _DEFAULT_MANUFACTURERS = [
     {
         "code": "aiswei",
         "name": "爱士惟",
-        "api_base_url": "https://api.general.aisweicloud.com",
+        "api_base_url": "https://api.aisweicloud.com",
         "auth_config": {
             "token": "R3dBOTVXeUdGRDBTTmJvMjZyNDF0QT09",
             "key": "204929444",
