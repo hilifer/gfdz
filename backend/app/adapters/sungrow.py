@@ -242,7 +242,7 @@ class SungrowAdapter(BaseAdapter):
                     device_type=_normalise_device_type(dev_type_raw),
                     brand="sungrow",
                     model=d.get("device_model") or d.get("dev_model") or d.get("device_model_code"),
-                    serial_number=d.get("sn") or d.get("serial_number"),
+                    serial_number=d.get("device_sn") or d.get("sn") or d.get("serial_number"),
                     rated_power=_safe_float(d.get("rated_power")),
                     status=_map_status(
                         d.get("dev_status") or d.get("device_status") or d.get("status")

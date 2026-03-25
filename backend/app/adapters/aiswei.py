@@ -32,7 +32,8 @@ class AisweiAdapter(BaseAdapter):
 
     MANUFACTURER = "aiswei"
 
-    SIGNED_HEADERS = ["X-Ca-Key", "X-Ca-Nonce", "X-Ca-Stage", "X-Ca-Timestamp", "X-Ca-Version"]
+    # X-Ca-Nonce is NOT part of signature — it's added after signing
+    SIGNED_HEADERS = ["X-Ca-Key", "X-Ca-Stage", "X-Ca-Timestamp", "X-Ca-Version"]
 
     def __init__(self, api_base_url: str, auth_config: dict):
         super().__init__(api_base_url, auth_config)
@@ -66,18 +67,17 @@ class AisweiAdapter(BaseAdapter):
         timestamp = str(int(time.time() * 1000))
         nonce = uuid.uuid4().hex
 
-        # Headers that participate in signing (sorted)
-        header_values = {
+        # Headers that participate in signing (sorted) — X-Ca-Nonce excluded
+        sign_headers = {
             "X-Ca-Key": self._app_key,
-            "X-Ca-Nonce": nonce,
             "X-Ca-Stage": "RELEASE",
             "X-Ca-Timestamp": timestamp,
             "X-Ca-Version": "1",
         }
 
         # Build canonical headers string
-        sorted_keys = sorted(header_values.keys())
-        headers_str = "\n".join(f"{k}:{header_values[k]}" for k in sorted_keys)
+        sorted_keys = sorted(sign_headers.keys())
+        headers_str = "\n".join(f"{k}:{sign_headers[k]}" for k in sorted_keys)
 
         # String to sign
         string_to_sign = "\n".join(
@@ -116,7 +116,9 @@ class AisweiAdapter(BaseAdapter):
         # Always inject token
         params.setdefault("token", self._token)
 
-        query_string = urlencode(params, doseq=True)
+        # Query params MUST be sorted alphabetically for signature to match
+        sorted_params = sorted(params.items(), key=lambda x: x[0])
+        query_string = urlencode(sorted_params, doseq=True)
         full_path = f"{path}?{query_string}" if query_string else path
 
         headers = self._sign("GET", full_path, accept="application/json")
