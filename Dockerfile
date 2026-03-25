@@ -2,13 +2,11 @@ FROM python:3.12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 安装系统依赖：PostgreSQL, Redis, Nginx, Supervisor
+# 安装系统依赖：PostgreSQL, Redis, Supervisor（不要 Nginx）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc libpq-dev \
     postgresql postgresql-client \
     redis-server \
-    nginx \
-    curl \
     supervisor \
     locales \
     && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen \
@@ -23,9 +21,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制后端代码、模板、静态文件
 COPY backend/ /app/backend/
-
-# Nginx 配置
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Supervisor 配置
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
