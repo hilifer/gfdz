@@ -145,14 +145,14 @@ class SungrowAdapter(BaseAdapter):
                     StationInfo(
                         station_code=ps_id,
                         name=s.get("ps_name") or s.get("plant_name", ""),
-                        capacity_kwp=_safe_float(s.get("installed_power_map") or s.get("design_capacity")),
+                        capacity_kwp=_extract_map_value(s.get("total_capcity")) or _safe_float(s.get("design_capacity")),
                         status=_map_status(s.get("ps_status") or s.get("status")),
                         longitude=_safe_float(s.get("longitude")),
                         latitude=_safe_float(s.get("latitude")),
                         address=s.get("address") or s.get("ps_location"),
                         extra={k: v for k, v in s.items() if k not in (
                             "ps_id", "plant_id", "ps_name", "plant_name",
-                            "installed_power_map", "design_capacity",
+                            "total_capcity", "design_capacity",
                             "longitude", "latitude", "address", "ps_location",
                             "ps_status", "status",
                         )},
@@ -164,27 +164,30 @@ class SungrowAdapter(BaseAdapter):
         return stations
 
     async def get_station_realtime(self, station_code: str) -> StationRealtimeData | None:
-        body = await self._post("/openapi/getPlantRealData", {"ps_id": station_code})
+        # getPowerStationList already includes real-time data for each station,
+        # and getPlantRealData may require extra permissions (E900).
+        # Fetch station list and find the matching station.
+        body = await self._post("/openapi/getPowerStationList", {
+            "curPage": "1",
+            "size": "100",
+        })
         result_data = body.get("result_data") or {}
-        # Sungrow may return data nested under different keys
-        data = result_data if isinstance(result_data, dict) else {}
+        items = result_data.get("pageList") or []
+        data = None
+        for s in items:
+            if str(s.get("ps_id")) == str(station_code):
+                data = s
+                break
+        if data is None:
+            return None
 
+        # Fields are {unit, value} maps per API doc
         return StationRealtimeData(
-            current_power_kw=_safe_float(
-                data.get("curr_power") or data.get("current_power")
-            ),
-            today_generation=_safe_float(
-                data.get("today_energy") or data.get("day_energy")
-            ),
-            month_generation=_safe_float(
-                data.get("month_energy") or data.get("monthly_energy")
-            ),
-            year_generation=_safe_float(
-                data.get("year_energy") or data.get("yearly_energy")
-            ),
-            total_generation=_safe_float(
-                data.get("total_energy") or data.get("total_power")
-            ),
+            current_power_kw=_extract_map_value_kw(data.get("curr_power")),
+            today_generation=_extract_map_value(data.get("today_energy")),
+            month_generation=_extract_map_value(data.get("month_energy")),
+            year_generation=_extract_map_value(data.get("year_energy")),
+            total_generation=_extract_map_value(data.get("total_energy")),
         )
 
     async def get_station_daily(self, station_code: str, query_date: date) -> StationDailyData | None:
@@ -380,6 +383,30 @@ class SungrowAdapter(BaseAdapter):
 # ------------------------------------------------------------------
 # Module-level helpers
 # ------------------------------------------------------------------
+
+def _extract_map_value(val) -> float | None:
+    """Extract numeric value from Sungrow {unit, value} map or plain value."""
+    if val is None:
+        return None
+    if isinstance(val, dict):
+        return _safe_float(val.get("value"))
+    return _safe_float(val)
+
+
+def _extract_map_value_kw(val) -> float | None:
+    """Extract value from {unit, value} map, converting to kW if unit is W."""
+    if val is None:
+        return None
+    if isinstance(val, dict):
+        raw = _safe_float(val.get("value"))
+        if raw is None:
+            return None
+        unit = (val.get("unit") or "").strip()
+        if unit == "W":
+            return raw / 1000.0
+        return raw
+    return _safe_float(val)
+
 
 def _safe_float(val) -> float | None:
     if val is None:
