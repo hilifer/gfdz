@@ -38,12 +38,12 @@ function setView(v) {
 async function loadStations() {
   const keyword = document.getElementById('keyword').value;
   const status = document.getElementById('status-filter').value;
-  let url = '/stations?limit=100';
+  let url = '/stations?page_size=100';
   if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
   if (status) url += `&status=${status}`;
   try {
     const res = await api(url);
-    const list = res.items || res || [];
+    const list = res.items || [];
     const el = document.getElementById('station-list');
     if (list.length === 0) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无电站数据</p>'; return; }
     if (currentView === 'card') {
@@ -55,8 +55,8 @@ async function loadStations() {
               ${statusBadge(s.status)}
             </div>
             <div class="grid grid-cols-2 gap-y-1 text-sm text-gray-500">
-              <span>装机容量: ${fmtNum(s.capacity)} kWp</span>
-              <span>当前功率: ${fmtNum(s.current_power)} kW</span>
+              <span>装机容量: ${fmtNum(s.capacity_kwp)} kWp</span>
+              <span>当前功率: ${fmtNum(s.current_power_kw)} kW</span>
               <span>今日发电: ${fmtNum(s.today_generation)} kWh</span>
               <span>厂家: ${s.manufacturer_name || '-'}</span>
             </div>
@@ -68,8 +68,8 @@ async function loadStations() {
       </tr></thead><tbody>` +
         list.map(s => `<tr class="cursor-pointer" onclick="location.href='/stations/${s.id}'">
           <td class="font-medium">${s.name}</td>
-          <td>${fmtNum(s.capacity)}</td>
-          <td>${fmtNum(s.current_power)}</td>
+          <td>${fmtNum(s.capacity_kwp)}</td>
+          <td>${fmtNum(s.current_power_kw)}</td>
           <td>${fmtNum(s.today_generation)}</td>
           <td>${s.manufacturer_name || '-'}</td>
           <td>${statusBadge(s.status)}</td>

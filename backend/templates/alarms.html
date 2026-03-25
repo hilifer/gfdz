@@ -35,7 +35,7 @@ async function loadStats() {
       dataCard('🔴', '严重告警', s.critical || 0, '条', 'red'),
       dataCard('🟠', '警告', s.warning || 0, '条', 'orange'),
       dataCard('🔵', '信息', s.info || 0, '条', 'blue'),
-      dataCard('📊', '活跃总数', (s.critical||0) + (s.warning||0) + (s.info||0), '条', 'purple'),
+      dataCard('📊', '活跃总数', s.total_active || 0, '条', 'purple'),
     ].join('');
   } catch(e) {}
 }
@@ -52,19 +52,19 @@ async function confirmAlarm(id) {
 async function loadAlarms() {
   const level = document.getElementById('level-filter').value;
   const status = document.getElementById('status-filter').value;
-  let url = '/alarms?limit=100';
-  if (level) url += `&level=${level}`;
+  let url = '/alarms?page_size=100';
+  if (level) url += `&alarm_level=${level}`;
   if (status) url += `&status=${status}`;
   try {
     const res = await api(url);
-    const list = res.items || res || [];
+    const list = res.items || [];
     const el = document.getElementById('alarm-list');
     if (!list.length) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无告警</p>'; return; }
     el.innerHTML = `<table class="tbl"><thead><tr>
       <th>级别</th><th>告警名称</th><th>电站</th><th>设备</th><th>告警时间</th><th>状态</th><th>操作</th>
     </tr></thead><tbody>` +
     list.map(a => `<tr>
-      <td>${statusBadge(a.level)}</td>
+      <td>${statusBadge(a.alarm_level)}</td>
       <td class="font-medium">${a.alarm_name || '-'}</td>
       <td>${a.station_name || '-'}</td>
       <td>${a.device_name || '-'}</td>

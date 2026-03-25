@@ -22,18 +22,17 @@ const deviceId = location.pathname.split('/').pop();
 (async function(){
   try {
     const d = await api(`/devices/${deviceId}`);
-    document.getElementById('dev-name').textContent = d.name || `设备 #${deviceId}`;
+    document.getElementById('dev-name').textContent = d.device_name || `设备 #${deviceId}`;
     const ld = d.latest_data || {};
     document.getElementById('cards').innerHTML = [
-      dataCard('⚡', '当前功率', fmtNum(ld.power ?? d.current_power), 'kW', 'orange'),
-      dataCard('🔌', '电压', fmtNum(ld.voltage), 'V', 'blue'),
-      dataCard('💡', '电流', fmtNum(ld.current), 'A', 'cyan'),
+      dataCard('⚡', '当前功率', fmtNum(ld.power_kw), 'kW', 'orange'),
+      dataCard('🔌', '电压', fmtNum(ld.voltage_v), 'V', 'blue'),
+      dataCard('💡', '电流', fmtNum(ld.current_a), 'A', 'cyan'),
       dataCard('🌡️', '温度', fmtNum(ld.temperature), '℃', 'red'),
-      dataCard('🔋', '今日发电', fmtNum(ld.daily_generation ?? d.today_generation), 'kWh', 'green'),
+      dataCard('🔋', '今日发电', fmtNum(ld.daily_generation), 'kWh', 'green'),
       dataCard('📊', '额定功率', fmtNum(d.rated_power), 'kW', 'purple'),
     ].join('');
 
-    // 历史数据
     try {
       const history = await api(`/devices/${deviceId}/history`);
       if (history && history.length) {
@@ -42,7 +41,7 @@ const deviceId = location.pathname.split('/').pop();
           tooltip: { trigger: 'axis' },
           xAxis: { type: 'category', data: history.map(h => (h.timestamp||'').substring(11,16)) },
           yAxis: { type: 'value', name: 'kW' },
-          series: [{ type: 'line', data: history.map(h => h.power || 0), smooth: true, areaStyle: { opacity: .15 }, itemStyle: { color: '#f59e0b' } }]
+          series: [{ type: 'line', data: history.map(h => h.power_kw || 0), smooth: true, areaStyle: { opacity: .15 }, itemStyle: { color: '#f59e0b' } }]
         });
         window.addEventListener('resize', () => chart.resize());
       } else {

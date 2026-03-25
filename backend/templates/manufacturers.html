@@ -15,6 +15,7 @@ async function syncMfr(id, btn) {
   try {
     await api(`/manufacturers/${id}/sync`, { method: 'POST' });
     toast('同步已触发', 'success');
+    setTimeout(() => location.reload(), 2000);
   } catch(e) { toast(e.message, 'error'); }
   btn.disabled = false; btn.textContent = '立即同步';
 }
@@ -28,13 +29,13 @@ async function syncMfr(id, btn) {
       <div class="card">
         <div class="flex items-center justify-between mb-3">
           <span class="font-bold text-gray-800 text-lg">${m.name}</span>
-          ${statusBadge(m.is_active !== false ? 'normal' : 'offline')}
+          ${statusBadge(m.is_active ? 'normal' : 'offline')}
         </div>
         <div class="text-sm text-gray-500 space-y-1 mb-3">
           <div>编码: <span class="text-gray-700">${m.code || '-'}</span></div>
           <div>API地址: <span class="text-gray-700 text-xs break-all">${m.api_base_url || '-'}</span></div>
-          <div>同步间隔: <span class="text-gray-700">${m.sync_interval || '-'} 分钟</span></div>
-          <div>最后同步: <span class="text-gray-700">${fmtDate(m.last_sync_time)}</span></div>
+          <div>同步间隔: <span class="text-gray-700">${m.sync_interval || '-'} 秒</span></div>
+          <div>最后同步: <span class="text-gray-700">${fmtDate(m.last_sync_at)}</span></div>
         </div>
         <button class="btn btn-sm btn-primary w-full justify-center" onclick="syncMfr(${m.id}, this)">立即同步</button>
       </div>

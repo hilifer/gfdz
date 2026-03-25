@@ -41,8 +41,8 @@ function cancelEdit() {
 
 async function loadPrices(focusPrice) {
   try {
-    const res = await api('/stations?limit=100');
-    const list = res.items || res || [];
+    const res = await api('/stations?page_size=100');
+    const list = res.items || [];
     const el = document.getElementById('price-list');
     if (!list.length) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无电站</p>'; return; }
     el.innerHTML = `<table class="tbl"><thead><tr>
@@ -52,7 +52,7 @@ async function loadPrices(focusPrice) {
       const isEditing = editingId === s.id;
       return `<tr>
         <td class="font-medium">${s.name}</td>
-        <td>${fmtNum(s.capacity)}</td>
+        <td>${fmtNum(s.capacity_kwp)}</td>
         <td>${isEditing
           ? `<input type="number" step="0.01" min="0" id="price-input-${s.id}" class="form-input" style="width:120px" value="${focusPrice ?? s.electricity_price ?? ''}">`
           : `<span class="font-bold text-orange-600">${s.electricity_price != null ? s.electricity_price + ' 元' : '-'}</span>`

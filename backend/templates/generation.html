@@ -35,14 +35,13 @@
 <script>
 if (!requireAuth()) throw '';
 
-// 默认最近30天
 const now = new Date();
 document.getElementById('end-date').value = now.toISOString().slice(0,10);
 document.getElementById('start-date').value = new Date(now - 29*86400000).toISOString().slice(0,10);
 
 (async function(){
-  const res = await api('/stations?limit=100');
-  const list = res.items || res || [];
+  const res = await api('/stations?page_size=100');
+  const list = res.items || [];
   const sel = document.getElementById('station-select');
   sel.innerHTML = '<option value="">全部电站</option>' + list.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
   loadAnalysis();
@@ -54,17 +53,17 @@ async function loadAnalysis() {
   const stationId = document.getElementById('station-select').value;
 
   try {
-    const res = await api('/stations?limit=100');
-    const stations = res.items || res || [];
+    const res = await api('/stations?page_size=100');
+    const stations = res.items || [];
     const targets = stationId ? stations.filter(s => s.id == stationId) : stations.slice(0, 10);
 
     const dayMap = {};
     for (const st of targets) {
       try {
-        const daily = await api(`/stations/${st.id}/daily?start_date=${start}&end_date=${end}`);
+        const daily = await api(`/stations/${st.id}/daily?start=${start}&end=${end}`);
         (daily || []).forEach(d => {
           const key = (d.date || '').substring(0,10);
-          dayMap[key] = (dayMap[key] || 0) + (d.generation || 0);
+          dayMap[key] = (dayMap[key] || 0) + (d.generation_kwh || 0);
         });
       } catch(e) {}
     }

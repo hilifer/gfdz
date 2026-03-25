@@ -24,15 +24,20 @@ if (!requireAuth()) throw '';
 (async function(){
   try {
     const s = await api('/dashboard/summary');
+    const dist = s.status_distribution || {};
+    const normalCount = dist.normal || 0;
+    const faultCount = dist.fault || 0;
+    const offlineCount = dist.offline || 0;
+
     document.getElementById('cards').innerHTML = [
       dataCard('🏭', '电站总数', s.station_count ?? 0, '座', 'blue'),
-      dataCard('⚡', '总装机容量', fmtNum(s.total_capacity), 'kWp', 'orange'),
-      dataCard('🔋', '今日发电', fmtNum(s.today_generation), 'kWh', 'green'),
-      dataCard('📈', '当前功率', fmtNum(s.current_power), 'kW', 'purple'),
-      dataCard('🌞', '累计发电', fmtNum(s.total_generation), 'kWh', 'cyan'),
+      dataCard('⚡', '总装机容量', fmtNum(s.total_capacity_kwp), 'kWp', 'orange'),
+      dataCard('🔋', '今日发电', fmtNum(s.today_generation_kwh), 'kWh', 'green'),
+      dataCard('📈', '当前功率', fmtNum(s.current_power_kw), 'kW', 'purple'),
+      dataCard('🌞', '累计发电', fmtNum(s.total_generation_kwh), 'kWh', 'cyan'),
       dataCard('🔔', '活跃告警', s.active_alarms ?? 0, '条', 'red'),
-      dataCard('✅', '正常电站', s.normal_stations ?? 0, '座', 'green'),
-      dataCard('⚠️', '故障电站', s.fault_stations ?? 0, '座', 'orange'),
+      dataCard('✅', '正常电站', normalCount, '座', 'green'),
+      dataCard('⚠️', '故障电站', faultCount, '座', 'orange'),
     ].join('');
 
     // 电站状态饼图
@@ -43,9 +48,9 @@ if (!requireAuth()) throw '';
       series: [{
         type: 'pie', radius: ['40%','70%'], padAngle: 2, itemStyle: { borderRadius: 6 },
         data: [
-          { value: s.normal_stations || 0, name: '正常' },
-          { value: s.fault_stations || 0, name: '故障' },
-          { value: s.offline_stations || 0, name: '离线' },
+          { value: normalCount, name: '正常' },
+          { value: faultCount, name: '故障' },
+          { value: offlineCount, name: '离线' },
         ],
         label: { formatter: '{b}: {c}座' }
       }]
@@ -53,18 +58,18 @@ if (!requireAuth()) throw '';
     window.addEventListener('resize', () => statusChart.resize());
 
     // 7日发电趋势
-    const stations = await api('/stations?limit=100');
-    const list = stations.items || stations || [];
+    const stations = await api('/stations?page_size=100');
+    const list = stations.items || [];
     if (list.length > 0) {
       const end = new Date().toISOString().slice(0,10);
       const start = new Date(Date.now() - 6*86400000).toISOString().slice(0,10);
       const dayMap = {};
       for (const st of list.slice(0, 10)) {
         try {
-          const daily = await api(`/stations/${st.id}/daily?start_date=${start}&end_date=${end}`);
+          const daily = await api(`/stations/${st.id}/daily?start=${start}&end=${end}`);
           (daily || []).forEach(d => {
             const key = (d.date || '').substring(0,10);
-            dayMap[key] = (dayMap[key] || 0) + (d.generation || 0);
+            dayMap[key] = (dayMap[key] || 0) + (d.generation_kwh || 0);
           });
         } catch(e) {}
       }

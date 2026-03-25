@@ -36,23 +36,24 @@ const stationId = location.pathname.split('/').pop();
 (async function(){
   try {
     const s = await api(`/stations/${stationId}`);
+    const rt = s.realtime || {};
     document.getElementById('st-name').textContent = s.name;
     document.getElementById('cards').innerHTML = [
-      dataCard('⚡', '装机容量', fmtNum(s.capacity), 'kWp', 'blue'),
-      dataCard('📈', '当前功率', fmtNum(s.current_power), 'kW', 'orange'),
-      dataCard('🔋', '今日发电', fmtNum(s.today_generation), 'kWh', 'green'),
-      dataCard('🌞', '累计发电', fmtNum(s.total_generation), 'kWh', 'purple'),
-      dataCard('💰', '今日收益', fmtNum(s.today_revenue), '元', 'cyan'),
+      dataCard('⚡', '装机容量', fmtNum(s.capacity_kwp), 'kWp', 'blue'),
+      dataCard('📈', '当前功率', fmtNum(rt.current_power_kw), 'kW', 'orange'),
+      dataCard('🔋', '今日发电', fmtNum(rt.today_generation), 'kWh', 'green'),
+      dataCard('🌞', '累计发电', fmtNum(rt.total_generation), 'kWh', 'purple'),
+      dataCard('💰', '今日收益', fmtNum(rt.today_revenue), '元', 'cyan'),
       dataCard('🔌', '设备数量', s.device_count ?? '-', '台', 'blue'),
     ].join('');
 
     const infoRows = [
-      ['装机容量', `${s.capacity || '-'} kWp`],
+      ['装机容量', `${s.capacity_kwp || '-'} kWp`],
       ['地址', s.address || '-'],
       ['电站类型', s.station_type || '-'],
       ['并网日期', fmtDay(s.commissioned_date)],
       ['电价', s.electricity_price ? `${s.electricity_price} 元/kWh` : '-'],
-      ['联系人', s.contact_person || '-'],
+      ['联系人', s.contact_name || '-'],
       ['联系电话', s.contact_phone || '-'],
       ['设备数量', `${s.device_count ?? 0} 台`],
       ['状态', s.status || '-'],
@@ -64,10 +65,10 @@ const stationId = location.pathname.split('/').pop();
     // 30日发电
     const end = new Date().toISOString().slice(0,10);
     const start = new Date(Date.now() - 29*86400000).toISOString().slice(0,10);
-    const daily = await api(`/stations/${stationId}/daily?start_date=${start}&end_date=${end}`);
+    const daily = await api(`/stations/${stationId}/daily?start=${start}&end=${end}`);
     if (daily && daily.length) {
       const dates = daily.map(d => (d.date||'').substring(5,10));
-      const values = daily.map(d => +(d.generation||0).toFixed(1));
+      const values = daily.map(d => +(d.generation_kwh||0).toFixed(1));
       const dailyChart = echarts.init(document.getElementById('chart-daily'));
       dailyChart.setOption({
         tooltip: { trigger: 'axis' },
@@ -78,7 +79,7 @@ const stationId = location.pathname.split('/').pop();
       window.addEventListener('resize', () => dailyChart.resize());
     }
 
-    // 功率曲线 (占位 - 需要小时级数据API)
+    // 功率曲线
     const powerEl = document.getElementById('chart-power');
     try {
       const today = new Date().toISOString().slice(0,10);

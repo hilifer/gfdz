@@ -26,7 +26,7 @@ if (!requireAuth()) throw '';
       <td>${roleBadge(u.role)}</td>
       <td>${u.phone || '-'}</td>
       <td>${statusBadge(u.is_active !== false ? 'enabled' : 'disabled')}</td>
-      <td class="text-xs text-gray-400">${fmtDate(u.last_login)}</td>
+      <td class="text-xs text-gray-400">${fmtDate(u.last_login_at)}</td>
     </tr>`).join('') + '</tbody></table>';
   } catch(e) { document.getElementById('user-list').innerHTML = '<p class="text-center text-red-400 py-4">加载失败</p>'; }
 })();
