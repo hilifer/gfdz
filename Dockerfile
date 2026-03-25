@@ -2,11 +2,12 @@ FROM python:3.12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 安装系统依赖：PostgreSQL, Redis, Node.js, Supervisor
+# 安装系统依赖：PostgreSQL, Redis, Nginx, Node.js, Supervisor
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc libpq-dev \
     postgresql postgresql-client \
     redis-server \
+    nginx \
     curl \
     supervisor \
     locales \
@@ -32,6 +33,9 @@ RUN npm install
 COPY backend/ /app/backend/
 COPY frontend/ /app/frontend/
 
+# Nginx 配置
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+
 # Supervisor 配置
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -39,7 +43,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 3000
+EXPOSE 80
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

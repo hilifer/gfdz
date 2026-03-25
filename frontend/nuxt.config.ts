@@ -13,21 +13,6 @@ export default defineNuxtConfig({
     },
   },
 
-  // Nuxt 直接代理 /api 到后端，不需要 nginx
-  nitro: {
-    devProxy: {
-      "/api": {
-        target: "http://127.0.0.1:8000",
-        changeOrigin: true,
-      },
-    },
-    routeRules: {
-      "/api/**": {
-        proxy: "http://127.0.0.1:8000/api/**",
-      },
-    },
-  },
-
   // PrimeVue 手动注册（通过 plugin）
   build: {
     transpile: ["primevue", "echarts", "vue-echarts"],

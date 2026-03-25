@@ -3,13 +3,14 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "5001:3000"
+      - "5001:80"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./backend:/app/backend
       - ./frontend:/app/frontend
       - frontend_node_modules:/app/frontend/node_modules
       - ./supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./entrypoint.sh:/entrypoint.sh
     environment:
       POSTGRES_DB: gfdz
