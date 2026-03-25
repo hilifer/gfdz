@@ -157,7 +157,7 @@ class HuaweiAdapter(BaseAdapter):
             return None
         kpi = data_list[0].get("dataItemMap", {})
         return StationRealtimeData(
-            current_power_kw=_safe_float(kpi.get("real_health_state")),  # not available directly
+            current_power_kw=_safe_float(kpi.get("power")) or _safe_float(kpi.get("active_power")),
             today_generation=_safe_float(kpi.get("day_power")),
             month_generation=_safe_float(kpi.get("month_power")),
             total_generation=_safe_float(kpi.get("total_power")),

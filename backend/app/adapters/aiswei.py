@@ -32,7 +32,7 @@ class AisweiAdapter(BaseAdapter):
 
     MANUFACTURER = "aiswei"
 
-    SIGNED_HEADERS = ["X-Ca-Key", "X-Ca-Nonce", "X-Ca-Timestamp"]
+    SIGNED_HEADERS = ["X-Ca-Key", "X-Ca-Nonce", "X-Ca-Stage", "X-Ca-Timestamp", "X-Ca-Version"]
 
     def __init__(self, api_base_url: str, auth_config: dict):
         super().__init__(api_base_url, auth_config)
@@ -70,7 +70,9 @@ class AisweiAdapter(BaseAdapter):
         header_values = {
             "X-Ca-Key": self._app_key,
             "X-Ca-Nonce": nonce,
+            "X-Ca-Stage": "RELEASE",
             "X-Ca-Timestamp": timestamp,
+            "X-Ca-Version": "1",
         }
 
         # Build canonical headers string
@@ -102,6 +104,8 @@ class AisweiAdapter(BaseAdapter):
             "X-Ca-Key": self._app_key,
             "X-Ca-Timestamp": timestamp,
             "X-Ca-Nonce": nonce,
+            "X-Ca-Stage": "RELEASE",
+            "X-Ca-Version": "1",
             "X-Ca-Signature-Headers": ",".join(sorted_keys),
             "X-Ca-Signature": signature,
         }
@@ -186,7 +190,7 @@ class AisweiAdapter(BaseAdapter):
             return _safe_float(entry)
 
         return StationRealtimeData(
-            current_power_kw=_safe_float_div(_extract("Power"), 1.0),  # may already be kW
+            current_power_kw=_safe_float_div(_extract("Power"), 1000.0),  # API returns W, convert to kW
             today_generation=_extract("E-Today"),
             month_generation=_extract("E-Month"),
             year_generation=_extract("E-Year"),
@@ -478,12 +482,13 @@ def _safe_float_div(val: float | None, divisor: float) -> float | None:
 
 
 def _aiswei_station_status(status: object) -> str:
-    mapping = {0: "offline", 1: "normal", 2: "warning"}
+    mapping = {0: "offline", 1: "normal", 2: "warning", 3: "alarm", 4: "partial_offline"}
     return mapping.get(int(status) if status is not None else -1, "unknown")
 
 
 def _aiswei_inv_state(state: object) -> str:
-    mapping = {0: "offline", 1: "normal", 2: "warning", 3: "fault"}
+    # istate: 0=offline, 1=online, 2=cached (per API doc)
+    mapping = {0: "offline", 1: "normal", 2: "offline"}
     return mapping.get(int(state) if state is not None else -1, "unknown")
 
 
