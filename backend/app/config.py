@@ -2,11 +2,11 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # 数据库
-    DATABASE_URL: str = "postgresql+asyncpg://gfdz:gfdz123456@db:5432/gfdz"
+    # 数据库 — 单容器部署默认用 localhost
+    DATABASE_URL: str = "postgresql+asyncpg://gfdz:gfdz123456@localhost:5432/gfdz"
 
     # Redis
-    REDIS_URL: str = "redis://redis:6379/0"
+    REDIS_URL: str = "redis://localhost:6379/0"
 
     # JWT
     JWT_SECRET: str = "your-jwt-secret-change-in-production"
@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     class Config:
-        env_file = ".env"
+        # 不读 .env 文件，只用环境变量，避免 .env 覆盖 docker-compose 配置
         extra = "ignore"
 
 
