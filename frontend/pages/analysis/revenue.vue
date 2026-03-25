@@ -60,7 +60,7 @@
     <div class="bg-white rounded-xl p-6 shadow-sm">
       <h3 class="text-lg font-semibold text-gray-700 mb-4">收益趋势</h3>
       <div class="h-80">
-        <VChart :option="chartOption" autoresize />
+        <ClientOnly><VChart :option="chartOption" autoresize /></ClientOnly>
       </div>
     </div>
   </div>

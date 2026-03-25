@@ -29,13 +29,13 @@
       <div class="bg-white rounded-xl p-6 shadow-sm">
         <h3 class="text-lg font-semibold text-gray-700 mb-4">电站状态分布</h3>
         <div class="h-72">
-          <VChart :option="pieOption" autoresize />
+          <ClientOnly><VChart :option="pieOption" autoresize /></ClientOnly>
         </div>
       </div>
       <div class="bg-white rounded-xl p-6 shadow-sm">
         <h3 class="text-lg font-semibold text-gray-700 mb-4">近7天发电趋势</h3>
         <div class="h-72">
-          <VChart :option="barOption" autoresize />
+          <ClientOnly><VChart :option="barOption" autoresize /></ClientOnly>
         </div>
       </div>
     </div>

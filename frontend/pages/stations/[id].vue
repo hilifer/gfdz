@@ -64,7 +64,7 @@
       <div class="bg-white rounded-xl p-6 shadow-sm lg:col-span-2">
         <h3 class="text-lg font-semibold text-gray-700 mb-4">今日功率曲线</h3>
         <div class="h-64">
-          <VChart :option="powerCurveOption" autoresize />
+          <ClientOnly><VChart :option="powerCurveOption" autoresize /></ClientOnly>
         </div>
       </div>
     </div>
@@ -73,7 +73,7 @@
     <div class="bg-white rounded-xl p-6 shadow-sm">
       <h3 class="text-lg font-semibold text-gray-700 mb-4">近30天发电量</h3>
       <div class="h-72">
-        <VChart :option="generationBarOption" autoresize />
+        <ClientOnly><VChart :option="generationBarOption" autoresize /></ClientOnly>
       </div>
     </div>
   </div>

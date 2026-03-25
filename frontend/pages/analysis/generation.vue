@@ -36,7 +36,7 @@
     <div class="bg-white rounded-xl p-6 shadow-sm">
       <h3 class="text-lg font-semibold text-gray-700 mb-4">发电量趋势</h3>
       <div class="h-96">
-        <VChart :option="chartOption" autoresize />
+        <ClientOnly><VChart :option="chartOption" autoresize /></ClientOnly>
       </div>
     </div>
   </div>
