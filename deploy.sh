@@ -7,25 +7,30 @@ echo "============================================"
 
 cd "$(dirname "$0")"
 
-# 1. 清理旧环境
+# 1. 拉取最新代码
 echo ""
-echo "[1/4] 清理旧容器和镜像..."
+echo "[1/5] 拉取最新代码..."
+git pull origin "$(git rev-parse --abbrev-ref HEAD)" 2>/dev/null || true
+
+# 2. 清理旧环境
+echo ""
+echo "[2/5] 清理旧容器和镜像..."
 docker-compose down -v 2>/dev/null || true
 docker system prune -f 2>/dev/null || true
 
-# 2. 构建镜像
+# 3. 构建镜像
 echo ""
-echo "[2/4] 构建 Docker 镜像（首次较慢，请耐心等待）..."
+echo "[3/5] 构建 Docker 镜像（首次较慢，请耐心等待）..."
 docker-compose build --no-cache
 
 # 3. 启动服务
 echo ""
-echo "[3/4] 启动服务..."
+echo "[4/5] 启动服务..."
 docker-compose up -d
 
 # 4. 等待服务就绪
 echo ""
-echo "[4/4] 等待服务启动..."
+echo "[5/5] 等待服务启动..."
 echo "（前端首次编译较慢，通常需要 1-3 分钟）"
 
 # 只检查容器是否正常运行，不等前端编译完成
