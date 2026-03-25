@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     supervisor \
     locales \
     && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen \
-    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 安装前端 Node 依赖到独立目录（不会被 volume 覆盖）
 WORKDIR /deps/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
-RUN npm install
+RUN node -v && npm -v && npm install && ls -la node_modules/.bin/nuxt
 
 # Nginx 配置
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
