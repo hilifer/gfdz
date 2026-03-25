@@ -45,6 +45,9 @@ async def list_users(db: AsyncSession = Depends(get_db), _=Depends(require_role(
 
 @router.post("/users")
 async def create_user(data: UserCreate, db: AsyncSession = Depends(get_db), _=Depends(require_role("admin"))):
+    existing = await db.scalar(select(User).where(User.username == data.username))
+    if existing:
+        raise HTTPException(status_code=400, detail="用户名已存在")
     user = User(
         username=data.username,
         password_hash=hash_password(data.password),

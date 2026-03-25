@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # 应用
     APP_NAME: str = "光伏电站监控平台"
-    DEBUG: bool = True
+    DEBUG: bool = False
 
     class Config:
         # 不读 .env 文件，只用环境变量，避免 .env 覆盖 docker-compose 配置

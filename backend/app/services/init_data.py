@@ -60,36 +60,39 @@ _DEFAULT_MANUFACTURERS = [
 
 async def init_default_data():
     """创建默认管理员账号和厂家数据"""
-    async with async_session() as db:
-        # ----- 默认管理员 -----
-        result = await db.execute(select(User).where(User.username == "admin"))
-        if not result.scalar_one_or_none():
-            admin = User(
-                username="admin",
-                password_hash=hash_password("admin123"),
-                display_name="系统管理员",
-                role="admin",
-            )
-            db.add(admin)
-            logger.info("已创建默认管理员账号: admin")
+    try:
+        async with async_session() as db:
+            # ----- 默认管理员 -----
+            result = await db.execute(select(User).where(User.username == "admin"))
+            if not result.scalar_one_or_none():
+                admin = User(
+                    username="admin",
+                    password_hash=hash_password("admin123"),
+                    display_name="系统管理员",
+                    role="admin",
+                )
+                db.add(admin)
+                logger.info("已创建默认管理员账号: admin")
 
-        # ----- 默认厂家 -----
-        for mfr_cfg in _DEFAULT_MANUFACTURERS:
-            existing = await db.execute(
-                select(Manufacturer).where(Manufacturer.code == mfr_cfg["code"])
-            )
-            if existing.scalar_one_or_none():
-                logger.debug("厂家已存在，跳过: %s", mfr_cfg["code"])
-                continue
+            # ----- 默认厂家 -----
+            for mfr_cfg in _DEFAULT_MANUFACTURERS:
+                existing = await db.execute(
+                    select(Manufacturer).where(Manufacturer.code == mfr_cfg["code"])
+                )
+                if existing.scalar_one_or_none():
+                    logger.debug("厂家已存在，跳过: %s", mfr_cfg["code"])
+                    continue
 
-            manufacturer = Manufacturer(
-                code=mfr_cfg["code"],
-                name=mfr_cfg["name"],
-                api_base_url=mfr_cfg["api_base_url"],
-                auth_config=json.dumps(mfr_cfg["auth_config"], ensure_ascii=False),
-                is_active=True,
-            )
-            db.add(manufacturer)
-            logger.info("已创建厂家: %s (%s)", mfr_cfg["name"], mfr_cfg["code"])
+                manufacturer = Manufacturer(
+                    code=mfr_cfg["code"],
+                    name=mfr_cfg["name"],
+                    api_base_url=mfr_cfg["api_base_url"],
+                    auth_config=json.dumps(mfr_cfg["auth_config"], ensure_ascii=False),
+                    is_active=True,
+                )
+                db.add(manufacturer)
+                logger.info("已创建厂家: %s (%s)", mfr_cfg["name"], mfr_cfg["code"])
 
-        await db.commit()
+            await db.commit()
+    except Exception as exc:
+        logger.error("初始化默认数据失败: %s", exc, exc_info=True)

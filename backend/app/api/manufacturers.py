@@ -50,6 +50,9 @@ async def list_manufacturers(db: AsyncSession = Depends(get_db), _=Depends(get_c
 
 @router.post("")
 async def create_manufacturer(data: ManufacturerCreate, db: AsyncSession = Depends(get_db), _=Depends(require_role("admin"))):
+    existing = await db.scalar(select(Manufacturer).where((Manufacturer.code == data.code) | (Manufacturer.name == data.name)))
+    if existing:
+        raise HTTPException(status_code=400, detail="厂家名称或编码已存在")
     mfr = Manufacturer(
         name=data.name,
         code=data.code,
