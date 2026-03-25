@@ -53,7 +53,7 @@
           password: document.getElementById('password').value
         })
       });
-      setToken(data.access_token);
+      setToken(data.token);
       location.href = '/';
     } catch(err) {
       errEl.textContent = err.message || '登录失败';
