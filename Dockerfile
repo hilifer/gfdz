@@ -1,5 +1,7 @@
 FROM python:3.12-slim
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # 安装系统依赖：PostgreSQL, Redis, Nginx, Node.js, Supervisor
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc libpq-dev \
@@ -8,16 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     curl \
     supervisor \
+    locales \
+    && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# 初始化 PostgreSQL
-USER postgres
-RUN /usr/lib/postgresql/*/bin/initdb -D /var/lib/postgresql/data && \
-    echo "host all all 0.0.0.0/0 md5" >> /var/lib/postgresql/data/pg_hba.conf && \
-    echo "listen_addresses='*'" >> /var/lib/postgresql/data/postgresql.conf
-USER root
+ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
 # 安装后端 Python 依赖
 WORKDIR /app/backend

@@ -4,22 +4,27 @@ set -e
 PG_BIN=$(ls -d /usr/lib/postgresql/*/bin | head -1)
 PG_DATA=/var/lib/postgresql/data
 
+echo "==> PostgreSQL bin: $PG_BIN"
+
 # 如果数据目录为空（volume 新挂载），则初始化
 if [ ! -f "$PG_DATA/PG_VERSION" ]; then
-    echo "Initializing PostgreSQL data directory..."
+    echo "==> Initializing PostgreSQL data directory..."
+    mkdir -p "$PG_DATA"
     chown postgres:postgres "$PG_DATA"
     chmod 700 "$PG_DATA"
-    su - postgres -c "$PG_BIN/initdb -D $PG_DATA"
+    su - postgres -c "$PG_BIN/initdb -D $PG_DATA --locale=en_US.UTF-8"
     echo "host all all 0.0.0.0/0 md5" >> "$PG_DATA/pg_hba.conf"
     echo "listen_addresses='*'" >> "$PG_DATA/postgresql.conf"
+    echo "==> PostgreSQL initialized."
 fi
 
 # 确保权限正确
 chown -R postgres:postgres "$PG_DATA"
 chmod 700 "$PG_DATA"
 
-# 启动 PostgreSQL 创建用户和数据库
-su - postgres -c "$PG_BIN/pg_ctl start -D $PG_DATA -w -t 30"
+# 启动 PostgreSQL，创建用户和数据库
+echo "==> Starting PostgreSQL to setup database..."
+su - postgres -c "$PG_BIN/pg_ctl start -D $PG_DATA -w -t 30 -o '-c listen_addresses=localhost'"
 
 su - postgres -c "psql -tc \"SELECT 1 FROM pg_roles WHERE rolname='${POSTGRES_USER:-gfdz}'\" | grep -q 1 || \
     psql -c \"CREATE USER ${POSTGRES_USER:-gfdz} WITH PASSWORD '${POSTGRES_PASSWORD:-gfdz123456}';\""
@@ -29,4 +34,5 @@ su - postgres -c "psql -tc \"SELECT 1 FROM pg_database WHERE datname='${POSTGRES
 
 su - postgres -c "$PG_BIN/pg_ctl stop -D $PG_DATA -w"
 
+echo "==> Database ready. Starting services..."
 exec "$@"
