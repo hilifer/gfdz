@@ -21,22 +21,12 @@ ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 # 安装后端 Python 依赖
 WORKDIR /app/backend
 COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
-    python -c "from passlib.context import CryptContext; ctx=CryptContext(schemes=['bcrypt']); print('bcrypt OK:', ctx.hash('test')[:20])"
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 安装前端 Node 依赖
-WORKDIR /app/frontend
+# 安装前端 Node 依赖到独立目录（不会被 volume 覆盖）
+WORKDIR /deps/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
-
-# 复制全部源码
-COPY backend/ /app/backend/
-COPY frontend/ /app/frontend/
-
-# 构建前端（生产模式）
-WORKDIR /app/frontend
-ENV NUXT_PUBLIC_API_BASE=/api
-RUN npm run build
 
 # Nginx 配置
 COPY nginx/nginx.conf /etc/nginx/nginx.conf

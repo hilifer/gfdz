@@ -6,6 +6,9 @@ services:
       - "5001:80"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # 源代码挂载 — 改了代码 git pull 立刻生效，不用重建镜像
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
     environment:
       POSTGRES_DB: gfdz
       POSTGRES_USER: gfdz

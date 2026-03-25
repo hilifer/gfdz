@@ -9,68 +9,48 @@ cd "$(dirname "$0")"
 
 # 1. 拉取最新代码
 echo ""
-echo "[1/5] 拉取最新代码..."
+echo "[1/4] 拉取最新代码..."
 git pull origin "$(git rev-parse --abbrev-ref HEAD)" 2>/dev/null || true
 
-# 2. 清理旧环境
+# 2. 检查是否需要重建镜像（只有依赖变了才重建）
 echo ""
-echo "[2/5] 清理旧容器和镜像..."
-docker-compose down -v 2>/dev/null || true
-docker system prune -f 2>/dev/null || true
-
-# 3. 构建镜像
-echo ""
-echo "[3/5] 构建 Docker 镜像（首次较慢，请耐心等待）..."
-docker-compose build --no-cache
-
-# 3. 启动服务
-echo ""
-echo "[4/5] 启动服务..."
-docker-compose up -d
-
-# 4. 等待服务就绪
-echo ""
-echo "[5/5] 等待服务启动..."
-echo "（前端首次编译较慢，通常需要 1-3 分钟）"
-
-# 只检查容器是否正常运行，不等前端编译完成
-MAX_WAIT=30
-WAITED=0
-CONTAINER_OK=false
-while [ $WAITED -lt $MAX_WAIT ]; do
-    # 检查容器是否在运行
-    if docker-compose ps 2>/dev/null | grep -q "Up"; then
-        CONTAINER_OK=true
-        break
-    fi
-    # 检查是否已退出/失败
-    if docker-compose ps 2>/dev/null | grep -qi "Exit\|restarting"; then
-        echo ""
-        echo "!!! 容器启动失败，查看日志："
-        docker-compose logs --tail=50 gfdz
-        exit 1
-    fi
-    sleep 2
-    WAITED=$((WAITED + 2))
-    printf "."
-done
-
-echo ""
-
-if [ "$CONTAINER_OK" = false ]; then
-    echo "警告：容器状态未知，查看日志："
-    docker-compose logs --tail=30 gfdz
-    exit 1
+echo "[2/4] 检查容器状态..."
+NEED_BUILD=false
+if ! docker-compose ps 2>/dev/null | grep -q "Up"; then
+    NEED_BUILD=true
+    echo "  容器未运行，需要构建..."
 fi
 
-# 容器已运行，再等后端 API 就绪（后端启动快）
-echo "容器已启动，等待后端 API 就绪..."
-MAX_WAIT=60
+if [ "$1" = "--rebuild" ]; then
+    NEED_BUILD=true
+    echo "  强制重建..."
+fi
+
+if [ "$NEED_BUILD" = true ]; then
+    echo ""
+    echo "[3/4] 构建 Docker 镜像..."
+    docker-compose down 2>/dev/null || true
+    docker-compose build --no-cache
+    echo ""
+    echo "[4/4] 启动服务..."
+    docker-compose up -d
+else
+    echo ""
+    echo "[3/4] 容器已运行，跳过构建"
+    echo ""
+    echo "[4/4] 代码已通过 volume 挂载，后端自动重载中..."
+    # 触发后端 reload（touch 一下让 uvicorn 检测到变化）
+    touch backend/app/main.py
+fi
+
+# 等待后端 API 就绪
+echo ""
+echo "等待服务就绪..."
+MAX_WAIT=120
 WAITED=0
 while [ $WAITED -lt $MAX_WAIT ]; do
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5001/api/health 2>/dev/null || echo "000")
-    if [ "$HTTP_CODE" != "000" ] && [ "$HTTP_CODE" != "502" ] && [ "$HTTP_CODE" != "503" ]; then
-        echo "后端 API 已就绪！"
+    if [ "$HTTP_CODE" = "200" ]; then
         break
     fi
     sleep 3
@@ -80,25 +60,33 @@ done
 
 echo ""
 
-if [ $WAITED -ge $MAX_WAIT ]; then
-    echo "后端启动较慢，查看日志排查问题："
-    docker-compose logs --tail=50 gfdz
-fi
-
-# 获取服务器 IP
 SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
 
-echo ""
-echo "============================================"
-echo "  部署完成！"
-echo "============================================"
-echo ""
-echo "  访问地址: http://${SERVER_IP}:5001"
-echo "  默认账号: admin"
-echo "  默认密码: admin123"
-echo ""
-echo "  常用命令："
-echo "    查看日志: docker-compose logs -f gfdz"
-echo "    重启服务: docker-compose restart"
-echo "    停止服务: docker-compose down"
+if [ "$HTTP_CODE" = "200" ]; then
+    echo "============================================"
+    echo "  部署成功！"
+    echo "============================================"
+    echo ""
+    echo "  访问地址: http://${SERVER_IP}:5001"
+    echo "  默认账号: admin"
+    echo "  默认密码: admin123"
+    echo ""
+    echo "  日常更新（改代码后）:"
+    echo "    bash deploy.sh          # 拉代码，自动生效"
+    echo ""
+    echo "  重装依赖（改了 package.json 或 requirements.txt）:"
+    echo "    bash deploy.sh --rebuild"
+    echo ""
+    echo "  其他命令:"
+    echo "    docker-compose logs -f   # 查看日志"
+    echo "    docker-compose restart   # 重启服务"
+    echo "    docker-compose down      # 停止服务"
+else
+    echo "============================================"
+    echo "  启动中，前端首次编译较慢（1-3分钟）"
+    echo "============================================"
+    echo ""
+    echo "  访问地址: http://${SERVER_IP}:5001"
+    echo "  查看日志: docker-compose logs -f"
+fi
 echo ""

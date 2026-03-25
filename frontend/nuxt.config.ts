@@ -18,5 +18,14 @@ export default defineNuxtConfig({
     transpile: ["primevue", "echarts", "vue-echarts"],
   },
 
+  vite: {
+    server: {
+      hmr: {
+        protocol: "ws",
+        clientPort: 5001,
+      },
+    },
+  },
+
   compatibilityDate: "2025-01-01",
 });
