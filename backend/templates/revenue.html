@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}收益分析 - 光伏监控平台{% endblock %}
+{% block page_title %}收益分析{% endblock %}
+
+{% block content %}
+<div class="card mb-6">
+  <div class="flex flex-wrap items-center gap-3">
+    <div>
+      <label class="form-label">开始日期</label>
+      <input type="date" id="start-date" class="form-input" style="width:160px">
+    </div>
+    <div>
+      <label class="form-label">结束日期</label>
+      <input type="date" id="end-date" class="form-input" style="width:160px">
+    </div>
+    <div class="pt-5">
+      <button class="btn btn-primary" onclick="loadRevenue()">查询</button>
+    </div>
+  </div>
+</div>
+
+<div id="summary-cards" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"></div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="card">
+    <div class="card-title">电站收益明细</div>
+    <div id="revenue-table"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">每日收益趋势</div>
+    <div id="chart-revenue" class="chart-box"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+
+const now = new Date();
+document.getElementById('end-date').value = now.toISOString().slice(0,10);
+document.getElementById('start-date').value = new Date(now - 29*86400000).toISOString().slice(0,10);
+loadRevenue();
+
+async function loadRevenue() {
+  const start = document.getElementById('start-date').value;
+  const end = document.getElementById('end-date').value;
+  try {
+    const res = await api('/stations?limit=100');
+    const stations = res.items || res || [];
+    const dayRevenue = {};
+    const stationRevenue = [];
+
+    for (const st of stations.slice(0, 20)) {
+      const price = st.electricity_price || 0;
+      let gen = 0;
+      try {
+        const daily = await api(`/stations/${st.id}/daily?start_date=${start}&end_date=${end}`);
+        (daily || []).forEach(d => {
+          gen += d.generation || 0;
+          const key = (d.date||'').substring(0,10);
+          dayRevenue[key] = (dayRevenue[key] || 0) + (d.generation || 0) * price;
+        });
+      } catch(e) {}
+      stationRevenue.push({ name: st.name, capacity: st.capacity, price, generation: gen, revenue: gen * price });
+    }
+
+    const totalRevenue = stationRevenue.reduce((s, r) => s + r.revenue, 0);
+    const totalGen = stationRevenue.reduce((s, r) => s + r.generation, 0);
+    const days = Object.keys(dayRevenue).sort();
+    const avgRevenue = days.length ? totalRevenue / days.length : 0;
+
+    document.getElementById('summary-cards').innerHTML = [
+      dataCard('💰', '总收益', fmtNum(totalRevenue), '元', 'orange'),
+      dataCard('⚡', '总发电', fmtNum(totalGen), 'kWh', 'green'),
+      dataCard('📊', '日均收益', fmtNum(avgRevenue), '元', 'blue'),
+      dataCard('🏭', '电站数', stationRevenue.length, '座', 'purple'),
+    ].join('');
+
+    // 电站明细表
+    document.getElementById('revenue-table').innerHTML = `<table class="tbl"><thead><tr>
+      <th>电站</th><th>容量(kWp)</th><th>电价(元)</th><th>发电(kWh)</th><th>收益(元)</th>
+    </tr></thead><tbody>` +
+    stationRevenue.map(r => `<tr>
+      <td class="font-medium">${r.name}</td><td>${fmtNum(r.capacity)}</td>
+      <td>${r.price || '-'}</td><td>${fmtNum(r.generation)}</td>
+      <td class="font-bold text-orange-600">${fmtNum(r.revenue)}</td>
+    </tr>`).join('') + '</tbody></table>';
+
+    // 日收益图表
+    const chart = echarts.init(document.getElementById('chart-revenue'));
+    chart.setOption({
+      tooltip: { trigger: 'axis', valueFormatter: v => v.toFixed(2) + ' 元' },
+      xAxis: { type: 'category', data: days.map(d => d.substring(5)) },
+      yAxis: { type: 'value', name: '元' },
+      series: [{ type: 'bar', data: days.map(d => +(dayRevenue[d]||0).toFixed(2)), itemStyle: { color: '#f59e0b', borderRadius: [4,4,0,0] } }]
+    });
+    window.addEventListener('resize', () => chart.resize());
+  } catch(e) { toast('查询失败', 'error'); }
+}
+</script>
+{% endblock %}

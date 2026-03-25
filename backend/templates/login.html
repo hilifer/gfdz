@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 光伏监控平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-cyan-500">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 w-96">
+    <div class="text-center mb-6">
+      <div class="text-4xl mb-2">☀️</div>
+      <h1 class="text-xl font-bold text-gray-800">光伏电站监控平台</h1>
+      <p class="text-sm text-gray-400 mt-1">Photovoltaic Monitoring System</p>
+    </div>
+
+    <div id="error-msg" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg"></div>
+
+    <form id="login-form" onsubmit="doLogin(event)">
+      <div class="mb-4">
+        <label class="form-label">用户名</label>
+        <input type="text" id="username" class="form-input" placeholder="请输入用户名" required autofocus>
+      </div>
+      <div class="mb-6">
+        <label class="form-label">密码</label>
+        <input type="password" id="password" class="form-input" placeholder="请输入密码" required>
+      </div>
+      <button type="submit" id="login-btn" class="btn btn-primary w-full justify-center text-base py-3">
+        登 录
+      </button>
+    </form>
+
+    <p class="text-center text-xs text-gray-400 mt-4">默认账号: admin / admin123</p>
+  </div>
+
+<script src="/static/js/app.js"></script>
+<script>
+  // 已登录直接跳转
+  if (getToken()) location.href = '/';
+
+  async function doLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('error-msg');
+    errEl.classList.add('hidden');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 登录中...';
+    try {
+      const data = await api('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value
+        })
+      });
+      setToken(data.access_token);
+      location.href = '/';
+    } catch(err) {
+      errEl.textContent = err.message || '登录失败';
+      errEl.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = '登 录';
+    }
+  }
+</script>
+</body>
+</html>

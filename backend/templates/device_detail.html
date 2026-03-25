@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}设备详情 - 光伏监控平台{% endblock %}
+{% block page_title %}设备详情{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="/devices" class="text-blue-500 hover:underline text-sm">← 返回设备列表</a>
+  <h3 class="text-lg font-bold text-gray-800 mt-1" id="dev-name">加载中...</h3>
+</div>
+<div id="cards" class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
+<div class="card">
+  <div class="card-title">历史功率曲线</div>
+  <div id="chart-history" class="chart-box"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+const deviceId = location.pathname.split('/').pop();
+
+(async function(){
+  try {
+    const d = await api(`/devices/${deviceId}`);
+    document.getElementById('dev-name').textContent = d.name || `设备 #${deviceId}`;
+    const ld = d.latest_data || {};
+    document.getElementById('cards').innerHTML = [
+      dataCard('⚡', '当前功率', fmtNum(ld.power ?? d.current_power), 'kW', 'orange'),
+      dataCard('🔌', '电压', fmtNum(ld.voltage), 'V', 'blue'),
+      dataCard('💡', '电流', fmtNum(ld.current), 'A', 'cyan'),
+      dataCard('🌡️', '温度', fmtNum(ld.temperature), '℃', 'red'),
+      dataCard('🔋', '今日发电', fmtNum(ld.daily_generation ?? d.today_generation), 'kWh', 'green'),
+      dataCard('📊', '额定功率', fmtNum(d.rated_power), 'kW', 'purple'),
+    ].join('');
+
+    // 历史数据
+    try {
+      const history = await api(`/devices/${deviceId}/history`);
+      if (history && history.length) {
+        const chart = echarts.init(document.getElementById('chart-history'));
+        chart.setOption({
+          tooltip: { trigger: 'axis' },
+          xAxis: { type: 'category', data: history.map(h => (h.timestamp||'').substring(11,16)) },
+          yAxis: { type: 'value', name: 'kW' },
+          series: [{ type: 'line', data: history.map(h => h.power || 0), smooth: true, areaStyle: { opacity: .15 }, itemStyle: { color: '#f59e0b' } }]
+        });
+        window.addEventListener('resize', () => chart.resize());
+      } else {
+        document.getElementById('chart-history').innerHTML = '<p class="text-center text-gray-400 pt-20">暂无历史数据</p>';
+      }
+    } catch(e) {
+      document.getElementById('chart-history').innerHTML = '<p class="text-center text-gray-400 pt-20">暂无历史数据</p>';
+    }
+  } catch(e) { document.getElementById('dev-name').textContent = '加载失败'; }
+})();
+</script>
+{% endblock %}

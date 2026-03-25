@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}光伏监控平台{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: {
+        primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8' },
+        sidebar: '#1e293b'
+      }}}
+    }
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+{% block body %}
+<div class="flex min-h-screen">
+  <!-- 侧边栏 -->
+  <aside class="w-56 bg-sidebar text-white flex flex-col flex-shrink-0 fixed h-full z-30">
+    <div class="h-14 flex items-center px-4 border-b border-white/10">
+      <span class="text-lg font-bold tracking-wide">☀️ 光伏监控平台</span>
+    </div>
+    <nav class="flex-1 py-2 overflow-y-auto text-sm" id="sidebar-nav">
+      <a href="/" class="nav-item" data-path="/">
+        <span class="nav-icon">📊</span>总览仪表盘
+      </a>
+      <a href="/stations" class="nav-item" data-path="/stations">
+        <span class="nav-icon">🏭</span>电站管理
+      </a>
+      <a href="/devices" class="nav-item" data-path="/devices">
+        <span class="nav-icon">🔌</span>设备管理
+      </a>
+      <a href="/alarms" class="nav-item" data-path="/alarms">
+        <span class="nav-icon">🔔</span>告警中心
+      </a>
+      <div class="px-4 pt-4 pb-1 text-xs text-gray-400 uppercase tracking-wider">数据分析</div>
+      <a href="/analysis/generation" class="nav-item" data-path="/analysis/generation">
+        <span class="nav-icon">⚡</span>发电分析
+      </a>
+      <a href="/analysis/revenue" class="nav-item" data-path="/analysis/revenue">
+        <span class="nav-icon">💰</span>收益分析
+      </a>
+      <div class="px-4 pt-4 pb-1 text-xs text-gray-400 uppercase tracking-wider">运维管理</div>
+      <a href="/work-orders" class="nav-item" data-path="/work-orders">
+        <span class="nav-icon">📋</span>工单管理
+      </a>
+      <div class="px-4 pt-4 pb-1 text-xs text-gray-400 uppercase tracking-wider">系统设置</div>
+      <a href="/settings/manufacturers" class="nav-item" data-path="/settings/manufacturers">
+        <span class="nav-icon">🏢</span>厂家管理
+      </a>
+      <a href="/settings/price" class="nav-item" data-path="/settings/price">
+        <span class="nav-icon">💲</span>电价配置
+      </a>
+      <a href="/settings/users" class="nav-item" data-path="/settings/users">
+        <span class="nav-icon">👥</span>用户管理
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 主内容 -->
+  <div class="flex-1 ml-56 flex flex-col">
+    <!-- 顶栏 -->
+    <header class="h-14 bg-white border-b flex items-center justify-between px-6 sticky top-0 z-20">
+      <h2 class="text-base font-semibold text-gray-700" id="page-title">{% block page_title %}总览{% endblock %}</h2>
+      <div class="flex items-center gap-4 text-sm text-gray-500">
+        <span id="header-time"></span>
+        <span class="relative cursor-pointer" onclick="location.href='/alarms'" title="告警">
+          🔔 <span id="alarm-badge" class="hidden absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full px-1"></span>
+        </span>
+        <span id="header-user" class="text-gray-700 font-medium"></span>
+        <button onclick="logout()" class="text-gray-400 hover:text-red-500" title="退出">退出</button>
+      </div>
+    </header>
+
+    <!-- 页面内容 -->
+    <main class="flex-1 p-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+<script src="/static/js/app.js"></script>
+<script>
+  // 高亮当前导航
+  (function(){
+    const path = location.pathname;
+    document.querySelectorAll('#sidebar-nav .nav-item').forEach(a => {
+      const dp = a.dataset.path;
+      if (path === dp || (dp !== '/' && path.startsWith(dp))) {
+        a.classList.add('active');
+      }
+    });
+  })();
+  // 顶栏时间
+  setInterval(() => {
+    document.getElementById('header-time').textContent = new Date().toLocaleString('zh-CN');
+  }, 1000);
+  // 用户信息 & 告警数
+  initHeader();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

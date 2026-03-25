@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}电站管理 - 光伏监控平台{% endblock %}
+{% block page_title %}电站管理{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+      <input type="text" id="keyword" class="form-input" style="width:220px" placeholder="搜索电站名称..." oninput="loadStations()">
+      <select id="status-filter" class="form-input" style="width:140px" onchange="loadStations()">
+        <option value="">全部状态</option>
+        <option value="normal">正常</option>
+        <option value="fault">故障</option>
+        <option value="offline">离线</option>
+      </select>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-outline btn-sm" onclick="setView('card')" id="btn-card">卡片</button>
+      <button class="btn btn-outline btn-sm" onclick="setView('table')" id="btn-table">表格</button>
+    </div>
+  </div>
+  <div id="station-list"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+
+let currentView = 'card';
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-card').className = `btn btn-sm ${v==='card'?'btn-primary':'btn-outline'}`;
+  document.getElementById('btn-table').className = `btn btn-sm ${v==='table'?'btn-primary':'btn-outline'}`;
+  loadStations();
+}
+
+async function loadStations() {
+  const keyword = document.getElementById('keyword').value;
+  const status = document.getElementById('status-filter').value;
+  let url = '/stations?limit=100';
+  if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+  if (status) url += `&status=${status}`;
+  try {
+    const res = await api(url);
+    const list = res.items || res || [];
+    const el = document.getElementById('station-list');
+    if (list.length === 0) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无电站数据</p>'; return; }
+    if (currentView === 'card') {
+      el.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">' +
+        list.map(s => `
+          <a href="/stations/${s.id}" class="block p-4 bg-gray-50 rounded-lg hover:shadow-md transition cursor-pointer border border-gray-100">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-semibold text-gray-800">${s.name}</span>
+              ${statusBadge(s.status)}
+            </div>
+            <div class="grid grid-cols-2 gap-y-1 text-sm text-gray-500">
+              <span>装机容量: ${fmtNum(s.capacity)} kWp</span>
+              <span>当前功率: ${fmtNum(s.current_power)} kW</span>
+              <span>今日发电: ${fmtNum(s.today_generation)} kWh</span>
+              <span>厂家: ${s.manufacturer_name || '-'}</span>
+            </div>
+          </a>
+        `).join('') + '</div>';
+    } else {
+      el.innerHTML = `<table class="tbl"><thead><tr>
+        <th>电站名称</th><th>装机容量(kWp)</th><th>当前功率(kW)</th><th>今日发电(kWh)</th><th>厂家</th><th>状态</th>
+      </tr></thead><tbody>` +
+        list.map(s => `<tr class="cursor-pointer" onclick="location.href='/stations/${s.id}'">
+          <td class="font-medium">${s.name}</td>
+          <td>${fmtNum(s.capacity)}</td>
+          <td>${fmtNum(s.current_power)}</td>
+          <td>${fmtNum(s.today_generation)}</td>
+          <td>${s.manufacturer_name || '-'}</td>
+          <td>${statusBadge(s.status)}</td>
+        </tr>`).join('') + '</tbody></table>';
+    }
+  } catch(e) { document.getElementById('station-list').innerHTML = '<p class="text-center text-red-400 py-4">加载失败</p>'; }
+}
+setView('card');
+</script>
+{% endblock %}

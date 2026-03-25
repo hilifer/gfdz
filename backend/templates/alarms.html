@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}告警中心 - 光伏监控平台{% endblock %}
+{% block page_title %}告警中心{% endblock %}
+
+{% block content %}
+<div id="stat-cards" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"></div>
+
+<div class="card">
+  <div class="flex items-center gap-3 mb-4">
+    <select id="level-filter" class="form-input" style="width:140px" onchange="loadAlarms()">
+      <option value="">全部级别</option>
+      <option value="critical">严重</option>
+      <option value="warning">警告</option>
+      <option value="info">信息</option>
+    </select>
+    <select id="status-filter" class="form-input" style="width:140px" onchange="loadAlarms()">
+      <option value="">全部状态</option>
+      <option value="active">活跃</option>
+      <option value="confirmed">已确认</option>
+      <option value="recovered">已恢复</option>
+    </select>
+  </div>
+  <div id="alarm-list"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+
+async function loadStats() {
+  try {
+    const s = await api('/alarms/stats');
+    document.getElementById('stat-cards').innerHTML = [
+      dataCard('🔴', '严重告警', s.critical || 0, '条', 'red'),
+      dataCard('🟠', '警告', s.warning || 0, '条', 'orange'),
+      dataCard('🔵', '信息', s.info || 0, '条', 'blue'),
+      dataCard('📊', '活跃总数', (s.critical||0) + (s.warning||0) + (s.info||0), '条', 'purple'),
+    ].join('');
+  } catch(e) {}
+}
+
+async function confirmAlarm(id) {
+  try {
+    await api(`/alarms/${id}/confirm`, { method: 'POST' });
+    toast('已确认', 'success');
+    loadAlarms();
+    loadStats();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function loadAlarms() {
+  const level = document.getElementById('level-filter').value;
+  const status = document.getElementById('status-filter').value;
+  let url = '/alarms?limit=100';
+  if (level) url += `&level=${level}`;
+  if (status) url += `&status=${status}`;
+  try {
+    const res = await api(url);
+    const list = res.items || res || [];
+    const el = document.getElementById('alarm-list');
+    if (!list.length) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无告警</p>'; return; }
+    el.innerHTML = `<table class="tbl"><thead><tr>
+      <th>级别</th><th>告警名称</th><th>电站</th><th>设备</th><th>告警时间</th><th>状态</th><th>操作</th>
+    </tr></thead><tbody>` +
+    list.map(a => `<tr>
+      <td>${statusBadge(a.level)}</td>
+      <td class="font-medium">${a.alarm_name || '-'}</td>
+      <td>${a.station_name || '-'}</td>
+      <td>${a.device_name || '-'}</td>
+      <td class="text-xs">${fmtDate(a.alarm_time)}</td>
+      <td>${statusBadge(a.status)}</td>
+      <td>${a.status === 'active' ? `<button class="btn btn-sm btn-primary" onclick="confirmAlarm(${a.id})">确认</button>` : '-'}</td>
+    </tr>`).join('') + '</tbody></table>';
+  } catch(e) { document.getElementById('alarm-list').innerHTML = '<p class="text-center text-red-400 py-4">加载失败</p>'; }
+}
+
+loadStats();
+loadAlarms();
+</script>
+{% endblock %}

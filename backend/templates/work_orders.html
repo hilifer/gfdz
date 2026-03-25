@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}工单管理 - 光伏监控平台{% endblock %}
+{% block page_title %}工单管理{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="flex items-center justify-between mb-4">
+    <select id="status-filter" class="form-input" style="width:150px" onchange="loadOrders()">
+      <option value="">全部状态</option>
+      <option value="pending">待处理</option>
+      <option value="in_progress">进行中</option>
+      <option value="completed">已完成</option>
+      <option value="closed">已关闭</option>
+    </select>
+    <button class="btn btn-primary" onclick="showCreateModal()">+ 创建工单</button>
+  </div>
+  <div id="order-list"></div>
+</div>
+
+<!-- 创建工单弹窗 -->
+<div id="create-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <div class="modal-title">创建工单</div>
+    <div class="mb-3">
+      <label class="form-label">标题</label>
+      <input type="text" id="wo-title" class="form-input" placeholder="请输入工单标题">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">关联电站</label>
+      <select id="wo-station" class="form-input"></select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">优先级</label>
+      <select id="wo-priority" class="form-input">
+        <option value="low">低</option>
+        <option value="medium" selected>中</option>
+        <option value="high">高</option>
+        <option value="urgent">紧急</option>
+      </select>
+    </div>
+    <div class="mb-4">
+      <label class="form-label">描述</label>
+      <textarea id="wo-desc" class="form-input" rows="3" placeholder="请输入工单描述"></textarea>
+    </div>
+    <div class="flex justify-end gap-2">
+      <button class="btn btn-outline" onclick="document.getElementById('create-modal').style.display='none'">取消</button>
+      <button class="btn btn-primary" onclick="createOrder()">创建</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+
+let stationsLoaded = false;
+async function loadStationOptions() {
+  if (stationsLoaded) return;
+  const res = await api('/stations?limit=100');
+  const list = res.items || res || [];
+  document.getElementById('wo-station').innerHTML = '<option value="">请选择电站</option>' +
+    list.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  stationsLoaded = true;
+}
+
+function showCreateModal() {
+  loadStationOptions();
+  document.getElementById('create-modal').style.display = '';
+}
+
+async function createOrder() {
+  const title = document.getElementById('wo-title').value;
+  const station_id = document.getElementById('wo-station').value;
+  const priority = document.getElementById('wo-priority').value;
+  const description = document.getElementById('wo-desc').value;
+  if (!title) { toast('请输入标题', 'error'); return; }
+  try {
+    await api('/work-orders', {
+      method: 'POST',
+      body: JSON.stringify({ title, station_id: station_id || null, priority, description })
+    });
+    toast('工单创建成功', 'success');
+    document.getElementById('create-modal').style.display = 'none';
+    document.getElementById('wo-title').value = '';
+    document.getElementById('wo-desc').value = '';
+    loadOrders();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function completeOrder(id) {
+  try {
+    await api(`/work-orders/${id}/complete`, { method: 'POST' });
+    toast('工单已完成', 'success');
+    loadOrders();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function loadOrders() {
+  const status = document.getElementById('status-filter').value;
+  let url = '/work-orders?limit=100';
+  if (status) url += `&status=${status}`;
+  try {
+    const res = await api(url);
+    const list = res.items || res || [];
+    const el = document.getElementById('order-list');
+    if (!list.length) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无工单</p>'; return; }
+    el.innerHTML = `<table class="tbl"><thead><tr>
+      <th>工单号</th><th>标题</th><th>电站</th><th>优先级</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th>
+    </tr></thead><tbody>` +
+    list.map(o => `<tr>
+      <td class="text-xs text-gray-400">${o.order_no || '-'}</td>
+      <td class="font-medium">${o.title || '-'}</td>
+      <td>${o.station_name || '-'}</td>
+      <td>${priorityBadge(o.priority)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>${o.creator_name || '-'}</td>
+      <td class="text-xs">${fmtDate(o.created_at)}</td>
+      <td>${o.status === 'pending' || o.status === 'in_progress' ? `<button class="btn btn-sm btn-success" onclick="completeOrder(${o.id})">完成</button>` : '-'}</td>
+    </tr>`).join('') + '</tbody></table>';
+  } catch(e) { document.getElementById('order-list').innerHTML = '<p class="text-center text-red-400 py-4">加载失败</p>'; }
+}
+loadOrders();
+</script>
+{% endblock %}

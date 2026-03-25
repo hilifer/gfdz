@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}电价配置 - 光伏监控平台{% endblock %}
+{% block page_title %}电价配置{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div id="price-list"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+
+let editingId = null;
+
+async function savePrice(id) {
+  const input = document.getElementById(`price-input-${id}`);
+  const price = parseFloat(input.value);
+  if (isNaN(price) || price < 0) { toast('请输入有效电价', 'error'); return; }
+  try {
+    await api(`/stations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ electricity_price: price })
+    });
+    toast('保存成功', 'success');
+    editingId = null;
+    loadPrices();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function startEdit(id, currentPrice) {
+  editingId = id;
+  loadPrices(currentPrice);
+}
+
+function cancelEdit() {
+  editingId = null;
+  loadPrices();
+}
+
+async function loadPrices(focusPrice) {
+  try {
+    const res = await api('/stations?limit=100');
+    const list = res.items || res || [];
+    const el = document.getElementById('price-list');
+    if (!list.length) { el.innerHTML = '<p class="text-center text-gray-400 py-8">暂无电站</p>'; return; }
+    el.innerHTML = `<table class="tbl"><thead><tr>
+      <th>电站名称</th><th>装机容量(kWp)</th><th>电价(元/kWh)</th><th>状态</th><th>操作</th>
+    </tr></thead><tbody>` +
+    list.map(s => {
+      const isEditing = editingId === s.id;
+      return `<tr>
+        <td class="font-medium">${s.name}</td>
+        <td>${fmtNum(s.capacity)}</td>
+        <td>${isEditing
+          ? `<input type="number" step="0.01" min="0" id="price-input-${s.id}" class="form-input" style="width:120px" value="${focusPrice ?? s.electricity_price ?? ''}">`
+          : `<span class="font-bold text-orange-600">${s.electricity_price != null ? s.electricity_price + ' 元' : '-'}</span>`
+        }</td>
+        <td>${statusBadge(s.status)}</td>
+        <td>${isEditing
+          ? `<button class="btn btn-sm btn-success" onclick="savePrice(${s.id})">保存</button> <button class="btn btn-sm btn-outline" onclick="cancelEdit()">取消</button>`
+          : `<button class="btn btn-sm btn-primary" onclick="startEdit(${s.id}, ${s.electricity_price ?? 0})">编辑</button>`
+        }</td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
+  } catch(e) { document.getElementById('price-list').innerHTML = '<p class="text-center text-red-400 py-4">加载失败</p>'; }
+}
+loadPrices();
+</script>
+{% endblock %}

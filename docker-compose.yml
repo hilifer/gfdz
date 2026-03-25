@@ -8,7 +8,6 @@ services:
       - pgdata:/var/lib/postgresql/data
       # 源代码挂载 — 改了代码 git pull 立刻生效，不用重建镜像
       - ./backend:/app/backend
-      - ./frontend:/app/frontend
     environment:
       POSTGRES_DB: gfdz
       POSTGRES_USER: gfdz
@@ -18,7 +17,6 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-in-production}
       JWT_ALGORITHM: HS256
       JWT_EXPIRE_MINUTES: 1440
-      NUXT_PUBLIC_API_BASE: /api
 
 volumes:
   pgdata:

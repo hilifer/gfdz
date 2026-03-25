@@ -2,13 +2,16 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import engine, Base
 from app.api import auth, dashboard, stations, devices, alarms, manufacturers, work_orders, system, data_query
+from app.pages import router as pages_router
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +62,14 @@ app.include_router(manufacturers.router, prefix="/api/manufacturers", tags=["厂
 app.include_router(work_orders.router, prefix="/api/work-orders", tags=["工单"])
 app.include_router(system.router, prefix="/api/system", tags=["系统"])
 app.include_router(data_query.router, prefix="/api/query", tags=["数据查询"])
+
+
+# 静态文件
+_static_dir = Path(__file__).resolve().parent.parent / "static"
+app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
+
+# 页面路由（放在 API 路由之后，避免冲突）
+app.include_router(pages_router)
 
 
 @app.get("/api/health")

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}电站详情 - 光伏监控平台{% endblock %}
+{% block page_title %}电站详情{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="/stations" class="text-blue-500 hover:underline text-sm">← 返回电站列表</a>
+  <h3 class="text-lg font-bold text-gray-800 mt-1" id="st-name">加载中...</h3>
+</div>
+
+<div id="cards" class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+  <div class="card">
+    <div class="card-title">基本信息</div>
+    <div id="info-table" class="text-sm"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">今日功率曲线</div>
+    <div id="chart-power" class="chart-box"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">近30日发电量</div>
+  <div id="chart-daily" class="chart-box"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+
+const stationId = location.pathname.split('/').pop();
+
+(async function(){
+  try {
+    const s = await api(`/stations/${stationId}`);
+    document.getElementById('st-name').textContent = s.name;
+    document.getElementById('cards').innerHTML = [
+      dataCard('⚡', '装机容量', fmtNum(s.capacity), 'kWp', 'blue'),
+      dataCard('📈', '当前功率', fmtNum(s.current_power), 'kW', 'orange'),
+      dataCard('🔋', '今日发电', fmtNum(s.today_generation), 'kWh', 'green'),
+      dataCard('🌞', '累计发电', fmtNum(s.total_generation), 'kWh', 'purple'),
+      dataCard('💰', '今日收益', fmtNum(s.today_revenue), '元', 'cyan'),
+      dataCard('🔌', '设备数量', s.device_count ?? '-', '台', 'blue'),
+    ].join('');
+
+    const infoRows = [
+      ['装机容量', `${s.capacity || '-'} kWp`],
+      ['地址', s.address || '-'],
+      ['电站类型', s.station_type || '-'],
+      ['并网日期', fmtDay(s.commissioned_date)],
+      ['电价', s.electricity_price ? `${s.electricity_price} 元/kWh` : '-'],
+      ['联系人', s.contact_person || '-'],
+      ['联系电话', s.contact_phone || '-'],
+      ['设备数量', `${s.device_count ?? 0} 台`],
+      ['状态', s.status || '-'],
+    ];
+    document.getElementById('info-table').innerHTML = '<table class="w-full">' +
+      infoRows.map(([k,v]) => `<tr><td class="py-2 text-gray-500 w-24">${k}</td><td class="py-2 text-gray-800 font-medium">${v}</td></tr>`).join('') +
+      '</table>';
+
+    // 30日发电
+    const end = new Date().toISOString().slice(0,10);
+    const start = new Date(Date.now() - 29*86400000).toISOString().slice(0,10);
+    const daily = await api(`/stations/${stationId}/daily?start_date=${start}&end_date=${end}`);
+    if (daily && daily.length) {
+      const dates = daily.map(d => (d.date||'').substring(5,10));
+      const values = daily.map(d => +(d.generation||0).toFixed(1));
+      const dailyChart = echarts.init(document.getElementById('chart-daily'));
+      dailyChart.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: dates },
+        yAxis: { type: 'value', name: 'kWh' },
+        series: [{ type: 'bar', data: values, itemStyle: { color: '#3b82f6', borderRadius: [4,4,0,0] } }]
+      });
+      window.addEventListener('resize', () => dailyChart.resize());
+    }
+
+    // 功率曲线 (占位 - 需要小时级数据API)
+    const powerEl = document.getElementById('chart-power');
+    try {
+      const today = new Date().toISOString().slice(0,10);
+      const hourly = await api(`/query/stations/${stationId}/hourly?date=${today}`);
+      if (hourly && hourly.length) {
+        const pc = echarts.init(powerEl);
+        pc.setOption({
+          tooltip: { trigger: 'axis' },
+          xAxis: { type: 'category', data: hourly.map(h => h.time || h.hour || '') },
+          yAxis: { type: 'value', name: 'kW' },
+          series: [{ type: 'line', data: hourly.map(h => h.power || h.value || 0), smooth: true, areaStyle: { opacity: 0.15 }, itemStyle: { color: '#f59e0b' } }]
+        });
+        window.addEventListener('resize', () => pc.resize());
+      } else {
+        powerEl.innerHTML = '<p class="text-center text-gray-400 pt-20">暂无今日功率数据</p>';
+      }
+    } catch(e) {
+      powerEl.innerHTML = '<p class="text-center text-gray-400 pt-20">暂无今日功率数据</p>';
+    }
+  } catch(e) {
+    console.error(e);
+    document.getElementById('st-name').textContent = '加载失败';
+  }
+})();
+</script>
+{% endblock %}

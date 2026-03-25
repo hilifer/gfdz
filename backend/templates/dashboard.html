@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}总览 - 光伏监控平台{% endblock %}
+{% block page_title %}总览仪表盘{% endblock %}
+
+{% block content %}
+<div id="cards" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"></div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="card">
+    <div class="card-title">电站状态分布</div>
+    <div id="chart-status" class="chart-box"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">近7日发电趋势</div>
+    <div id="chart-trend" class="chart-box"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (!requireAuth()) throw '';
+
+(async function(){
+  try {
+    const s = await api('/dashboard/summary');
+    document.getElementById('cards').innerHTML = [
+      dataCard('🏭', '电站总数', s.station_count ?? 0, '座', 'blue'),
+      dataCard('⚡', '总装机容量', fmtNum(s.total_capacity), 'kWp', 'orange'),
+      dataCard('🔋', '今日发电', fmtNum(s.today_generation), 'kWh', 'green'),
+      dataCard('📈', '当前功率', fmtNum(s.current_power), 'kW', 'purple'),
+      dataCard('🌞', '累计发电', fmtNum(s.total_generation), 'kWh', 'cyan'),
+      dataCard('🔔', '活跃告警', s.active_alarms ?? 0, '条', 'red'),
+      dataCard('✅', '正常电站', s.normal_stations ?? 0, '座', 'green'),
+      dataCard('⚠️', '故障电站', s.fault_stations ?? 0, '座', 'orange'),
+    ].join('');
+
+    // 电站状态饼图
+    const statusChart = echarts.init(document.getElementById('chart-status'));
+    statusChart.setOption({
+      tooltip: { trigger: 'item' },
+      color: ['#16a34a', '#dc2626', '#94a3b8'],
+      series: [{
+        type: 'pie', radius: ['40%','70%'], padAngle: 2, itemStyle: { borderRadius: 6 },
+        data: [
+          { value: s.normal_stations || 0, name: '正常' },
+          { value: s.fault_stations || 0, name: '故障' },
+          { value: s.offline_stations || 0, name: '离线' },
+        ],
+        label: { formatter: '{b}: {c}座' }
+      }]
+    });
+    window.addEventListener('resize', () => statusChart.resize());
+
+    // 7日发电趋势
+    const stations = await api('/stations?limit=100');
+    const list = stations.items || stations || [];
+    if (list.length > 0) {
+      const end = new Date().toISOString().slice(0,10);
+      const start = new Date(Date.now() - 6*86400000).toISOString().slice(0,10);
+      const dayMap = {};
+      for (const st of list.slice(0, 10)) {
+        try {
+          const daily = await api(`/stations/${st.id}/daily?start_date=${start}&end_date=${end}`);
+          (daily || []).forEach(d => {
+            const key = (d.date || '').substring(0,10);
+            dayMap[key] = (dayMap[key] || 0) + (d.generation || 0);
+          });
+        } catch(e) {}
+      }
+      const days = Object.keys(dayMap).sort();
+      const trendChart = echarts.init(document.getElementById('chart-trend'));
+      trendChart.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: days.map(d => d.substring(5)) },
+        yAxis: { type: 'value', name: 'kWh' },
+        series: [{ type: 'bar', data: days.map(d => +(dayMap[d]||0).toFixed(1)), itemStyle: { color: '#3b82f6', borderRadius: [4,4,0,0] } }]
+      });
+      window.addEventListener('resize', () => trendChart.resize());
+    }
+  } catch(e) {
+    console.error(e);
+    document.getElementById('cards').innerHTML = '<p class="col-span-4 text-center text-gray-400">加载失败</p>';
+  }
+})();
+</script>
+{% endblock %}
