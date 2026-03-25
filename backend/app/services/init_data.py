@@ -51,8 +51,8 @@ _DEFAULT_MANUFACTURERS = [
         "name": "锦浪Solis",
         "api_base_url": "https://api.ginlong.com:13333",
         "auth_config": {
-            "api_id": "",
-            "api_secret": "",
+            "api_id": "1300386381677083058",
+            "api_secret": "64ca50287e5e446988f6828ce4b16450",
         },
     },
 ]
