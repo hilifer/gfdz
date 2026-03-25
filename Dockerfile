@@ -21,7 +21,8 @@ ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 # 安装后端 Python 依赖
 WORKDIR /app/backend
 COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    python -c "from passlib.context import CryptContext; ctx=CryptContext(schemes=['bcrypt']); print('bcrypt OK:', ctx.hash('test')[:20])"
 
 # 安装前端 Node 依赖
 WORKDIR /app/frontend
