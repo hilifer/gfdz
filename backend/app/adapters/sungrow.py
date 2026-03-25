@@ -54,7 +54,7 @@ class SungrowAdapter(BaseAdapter):
                 headers={
                     "Content-Type": "application/json",
                     "sys_code": "901",
-                    "x-access-key": self._appkey,
+                    "x-access-key": self._secret or self._appkey,
                 },
             )
         return self._client
