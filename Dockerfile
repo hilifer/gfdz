@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     supervisor \
     locales \
     && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
