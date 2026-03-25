@@ -1,5 +1,3 @@
-import Aura from "@primevue/themes/aura";
-
 export default defineNuxtConfig({
   devtools: { enabled: false },
 
@@ -27,5 +25,5 @@ export default defineNuxtConfig({
     },
   },
 
-  compatibilityDate: "2025-01-01",
+  compatibilityDate: "2025-07-01",
 });
