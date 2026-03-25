@@ -14,6 +14,7 @@ celery[redis]==5.4.0
 # 认证
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
 
 # HTTP客户端（厂家API对接）
 httpx==0.28.1
