@@ -15,6 +15,12 @@
       <button @click="fetchRevenue" class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600">查询</button>
     </div>
 
+    <!-- 平台限制提示 -->
+    <div v-if="dateRangeWarning" class="bg-yellow-50 text-yellow-700 rounded-xl p-3 mb-4 text-sm flex items-center gap-2">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ dateRangeWarning }}
+    </div>
+
     <!-- 错误提示 -->
     <div v-if="errorMsg" class="bg-red-50 text-red-600 rounded-xl p-4 mb-6 text-sm">{{ errorMsg }}</div>
 
@@ -92,6 +98,16 @@ const startDate = ref((() => {
 
 const stationRevenues = ref<any[]>([]);
 const dailyRevenue = ref<{ date: string; revenue: number }[]>([]);
+
+const dateRangeWarning = computed(() => {
+  const s = new Date(startDate.value);
+  const e = new Date(endDate.value);
+  const days = Math.ceil((e.getTime() - s.getTime()) / 86400000);
+  if (days > 100) return `查询跨度${days}天超出平台限制(爱士惟≤7天 锦浪≤31天 阳光≤100天)，数据将自动截断`;
+  if (days > 31) return `查询跨度${days}天，爱士惟(≤7天)和锦浪(≤31天)电站数据可能不完整`;
+  if (days > 7) return `查询跨度${days}天，爱士惟平台电站数据可能不完整(限制≤7天)`;
+  return "";
+});
 
 const totalGeneration = computed(() => stationRevenues.value.reduce((sum, s) => sum + s.generation, 0));
 const totalRevenue = computed(() => stationRevenues.value.reduce((sum, s) => sum + s.revenue, 0));

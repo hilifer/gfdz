@@ -5,7 +5,7 @@ import hmac
 import logging
 import time
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from urllib.parse import urlencode, urlparse
 
 import httpx
@@ -199,7 +199,7 @@ class AisweiAdapter(BaseAdapter):
             return _safe_float(entry)
 
         return StationRealtimeData(
-            current_power_kw=_safe_float_div(_extract("Power"), 1000.0),  # API returns W, convert to kW
+            current_power_kw=_extract("Power"),  # API returns {unit: "KW", value: N}
             today_generation=_extract("E-Today"),
             month_generation=_extract("E-Month"),
             year_generation=_extract("E-Year"),
@@ -271,11 +271,13 @@ class AisweiAdapter(BaseAdapter):
 
     async def get_alarms(self, station_code: str) -> list[AlarmInfo]:
         today = date.today()
+        # AiSWEI getPlantEventPro limited to max 7-day range
+        week_ago = today - timedelta(days=6)
         body = await self._get(
             "/pro/getPlantEventPro",
             {
                 "apikey": station_code,
-                "sdt": today.strftime("%Y-%m-%d"),
+                "sdt": week_ago.strftime("%Y-%m-%d"),
                 "edt": today.strftime("%Y-%m-%d"),
             },
         )
