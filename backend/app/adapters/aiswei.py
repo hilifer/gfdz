@@ -116,14 +116,21 @@ class AisweiAdapter(BaseAdapter):
         # Always inject token
         params.setdefault("token", self._token)
 
-        # Query params MUST be sorted alphabetically for signature to match
+        # Query params MUST be sorted alphabetically for signature to match.
+        # The API gateway verifies signatures using decoded (raw) query values,
+        # so the signing string must use raw values (with spaces, not + or %20).
+        # The actual HTTP request URL uses %20-encoded values.
         sorted_params = sorted(params.items(), key=lambda x: x[0])
-        query_string = urlencode(sorted_params, doseq=True)
-        full_path = f"{path}?{query_string}" if query_string else path
+        raw_query = "&".join(f"{k}={v}" for k, v in sorted_params)
+        sign_path = f"{path}?{raw_query}" if raw_query else path
+        encoded_query = "&".join(
+            f"{k}={str(v).replace(' ', '%20')}" for k, v in sorted_params
+        )
+        request_path = f"{path}?{encoded_query}" if encoded_query else path
 
-        headers = self._sign("GET", full_path, accept="application/json")
+        headers = self._sign("GET", sign_path, accept="application/json")
         client = self._get_client()
-        resp = await client.get(full_path, headers=headers)
+        resp = await client.get(request_path, headers=headers)
         resp.raise_for_status()
         body = resp.json()
         if body.get("code") not in (None, 0, "0", 200, "200"):
