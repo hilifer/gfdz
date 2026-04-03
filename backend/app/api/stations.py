@@ -66,20 +66,19 @@ async def list_stations(
     # 检查是否有电站数据，没有则自动从各厂家平台拉取
     station_count = await db.scalar(select(func.count(Station.id)))
     if station_count == 0 and not _syncing:
-        async with _sync_lock:
-            # double check
-            station_count = await db.scalar(select(func.count(Station.id)))
-            if station_count == 0:
-                _syncing = True
-                try:
-                    from app.services.sync_service import run_full_sync
-                    logger.info("首次访问，自动触发从各厂家平台同步数据...")
-                    results = await run_full_sync()
-                    logger.info("自动同步完成: %s", results)
-                except Exception as e:
-                    logger.error("自动同步失败: %s", e)
-                finally:
-                    _syncing = False
+        _syncing = True
+        # 必须先关闭当前 DB session 上下文再跑 sync（避免 greenlet 冲突）
+        # sync_service 内部会创建自己的 session
+        await db.close()
+        try:
+            from app.services.sync_service import run_full_sync
+            logger.info("首次访问，自动触发从各厂家平台同步数据...")
+            results = await run_full_sync()
+            logger.info("自动同步完成: %s", results)
+        except Exception as e:
+            logger.error("自动同步失败: %s", e)
+        finally:
+            _syncing = False
 
     query = (
         select(Station, StationRealtime, Manufacturer.name.label("manufacturer_name"))
