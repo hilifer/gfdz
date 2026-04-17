@@ -1,5 +1,4 @@
 """电站管理接口"""
-import asyncio
 import logging
 from datetime import date
 
@@ -17,10 +16,6 @@ from app.models.manufacturer import Manufacturer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-# 同步状态锁，避免多个请求同时触发同步
-_sync_lock = asyncio.Lock()
-_syncing = False
 
 
 class StationCreate(BaseModel):
@@ -60,25 +55,8 @@ async def list_stations(
     db: AsyncSession = Depends(get_db),
     _=Depends(get_current_user),
 ):
-    """电站列表 — 支持筛选和分页，首次访问自动从各厂家平台同步数据"""
-    global _syncing
-
-    # 检查是否有电站数据，没有则自动从各厂家平台拉取
-    station_count = await db.scalar(select(func.count(Station.id)))
-    if station_count == 0 and not _syncing:
-        _syncing = True
-        # 必须先关闭当前 DB session 上下文再跑 sync（避免 greenlet 冲突）
-        # sync_service 内部会创建自己的 session
-        await db.close()
-        try:
-            from app.services.sync_service import run_full_sync
-            logger.info("首次访问，自动触发从各厂家平台同步数据...")
-            results = await run_full_sync()
-            logger.info("自动同步完成: %s", results)
-        except Exception as e:
-            logger.error("自动同步失败: %s", e)
-        finally:
-            _syncing = False
+    """电站列表 — 支持筛选和分页"""
+    # 注意：自动同步已移到应用启动时执行，不在此处触发（避免请求阻塞和 session 冲突）
 
     query = (
         select(Station, StationRealtime, Manufacturer.name.label("manufacturer_name"))

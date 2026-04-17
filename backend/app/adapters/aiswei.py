@@ -432,17 +432,21 @@ class AisweiAdapter(BaseAdapter):
             params["date"] = date
         return await self._get("/pro/getInverterOutputPro", params)
 
-    async def get_inverter_detail(self, isn: str) -> dict:
+    async def get_inverter_detail(self, apikeys: str) -> dict:
         """getInverterDetail — inverter basic info.
 
         Args:
-            isn: inverter serial number.
+            apikeys: comma-separated station apikey list (NOT inverter sn).
         """
-        return await self._get("/pro/getInverterDetail", {"isn": isn})
+        return await self._get("/pro/getInverterDetail", {"apikeys": apikeys})
 
-    async def get_user_detail(self) -> dict:
-        """getUserDetail — current user / station basic info."""
-        return await self._get("/pro/getUserDetail")
+    async def get_user_detail(self, apikeys: str) -> dict:
+        """getUserDetail — user / station basic info.
+
+        Args:
+            apikeys: comma-separated station apikey list.
+        """
+        return await self._get("/pro/getUserDetail", {"apikeys": apikeys})
 
     async def get_collector_location(self, psno: str) -> dict:
         """getLocationPro — collector location (address, longitude, latitude).
@@ -492,20 +496,29 @@ def _safe_float_div(val: float | None, divisor: float) -> float | None:
     return val / divisor
 
 
+def _safe_int(val: object, default: int = -1) -> int:
+    if val is None:
+        return default
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return default
+
+
 def _aiswei_station_status(status: object) -> str:
     mapping = {0: "offline", 1: "normal", 2: "warning", 3: "alarm", 4: "partial_offline"}
-    return mapping.get(int(status) if status is not None else -1, "unknown")
+    return mapping.get(_safe_int(status), "unknown")
 
 
 def _aiswei_inv_state(state: object) -> str:
     # istate: 0=offline, 1=online, 2=cached (per API doc)
     mapping = {0: "offline", 1: "normal", 2: "offline"}
-    return mapping.get(int(state) if state is not None else -1, "unknown")
+    return mapping.get(_safe_int(state), "unknown")
 
 
 def _aiswei_event_level(event_type: object) -> str:
     mapping = {1: "info", 2: "warning", 3: "critical"}
-    return mapping.get(int(event_type) if event_type is not None else 0, "info")
+    return mapping.get(_safe_int(event_type, 0), "info")
 
 
 def _parse_aiswei_time(val: object) -> datetime:

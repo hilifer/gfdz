@@ -78,8 +78,10 @@ async def sync_all_stations() -> dict:
         manufacturers = await _get_active_manufacturers(db)
 
         for mfr in manufacturers:
-            adapter = _make_adapter(mfr)
+            adapter = None
+            mfr_errors_before = len(summary["errors"])
             try:
+                adapter = _make_adapter(mfr)
                 await adapter.authenticate()
                 station_list = await adapter.get_station_list()
 
@@ -129,11 +131,12 @@ async def sync_all_stations() -> dict:
                 # 更新厂家同步时间
                 mfr.last_sync_at = datetime.now()
 
+                mfr_status = "success" if len(summary["errors"]) == mfr_errors_before else "partial"
                 await _create_sync_log(
                     db,
                     sync_type="station_list",
                     manufacturer_code=mfr.code,
-                    status="success",
+                    status=mfr_status,
                     records_count=len(station_list),
                 )
 
@@ -159,7 +162,11 @@ async def sync_all_stations() -> dict:
                     )
                     await log_db.commit()
             finally:
-                await adapter.close()
+                if adapter:
+                    try:
+                        await adapter.close()
+                    except Exception:
+                        pass
 
     return summary
 
@@ -176,8 +183,10 @@ async def sync_realtime_data() -> dict:
         manufacturers = await _get_active_manufacturers(db)
 
         for mfr in manufacturers:
-            adapter = _make_adapter(mfr)
+            adapter = None
+            mfr_errors_before = len(summary["errors"])
             try:
+                adapter = _make_adapter(mfr)
                 await adapter.authenticate()
 
                 # 获取该厂家所有活跃电站
@@ -197,6 +206,10 @@ async def sync_realtime_data() -> dict:
                     try:
                         data = await adapter.get_station_realtime(station.station_code)
                         if data is None:
+                            logger.warning(
+                                "实时数据为空: 厂家=%s, 电站=%s",
+                                mfr.code, station.station_code,
+                            )
                             continue
 
                         # Upsert realtime record
@@ -236,11 +249,12 @@ async def sync_realtime_data() -> dict:
                         summary["errors"].append(err_msg)
                         logger.error("同步实时数据失败: %s", err_msg)
 
+                mfr_status = "success" if len(summary["errors"]) == mfr_errors_before else "partial"
                 await _create_sync_log(
                     db,
                     sync_type="realtime",
                     manufacturer_code=mfr.code,
-                    status="success" if not summary["errors"] else "partial",
+                    status=mfr_status,
                     records_count=station_success,
                 )
                 summary["success"] += station_success
@@ -268,7 +282,11 @@ async def sync_realtime_data() -> dict:
                     )
                     await log_db.commit()
             finally:
-                await adapter.close()
+                if adapter:
+                    try:
+                        await adapter.close()
+                    except Exception:
+                        pass
 
     return summary
 
@@ -288,8 +306,10 @@ async def sync_daily_data(target_date: date | None = None) -> dict:
         manufacturers = await _get_active_manufacturers(db)
 
         for mfr in manufacturers:
-            adapter = _make_adapter(mfr)
+            adapter = None
+            mfr_errors_before = len(summary["errors"])
             try:
+                adapter = _make_adapter(mfr)
                 await adapter.authenticate()
 
                 result = await db.execute(
@@ -310,6 +330,10 @@ async def sync_daily_data(target_date: date | None = None) -> dict:
                             station.station_code, target_date
                         )
                         if data is None:
+                            logger.warning(
+                                "日数据为空: 厂家=%s, 电站=%s, 日期=%s",
+                                mfr.code, station.station_code, target_date,
+                            )
                             continue
 
                         # Upsert daily record
@@ -355,11 +379,12 @@ async def sync_daily_data(target_date: date | None = None) -> dict:
                         summary["errors"].append(err_msg)
                         logger.error("同步日数据失败: %s", err_msg)
 
+                mfr_status = "success" if len(summary["errors"]) == mfr_errors_before else "partial"
                 await _create_sync_log(
                     db,
                     sync_type="daily",
                     manufacturer_code=mfr.code,
-                    status="success" if not summary["errors"] else "partial",
+                    status=mfr_status,
                     records_count=station_success,
                 )
                 summary["success"] += station_success
@@ -388,7 +413,11 @@ async def sync_daily_data(target_date: date | None = None) -> dict:
                     )
                     await log_db.commit()
             finally:
-                await adapter.close()
+                if adapter:
+                    try:
+                        await adapter.close()
+                    except Exception:
+                        pass
 
     return summary
 
@@ -405,8 +434,12 @@ async def sync_devices() -> dict:
         manufacturers = await _get_active_manufacturers(db)
 
         for mfr in manufacturers:
-            adapter = _make_adapter(mfr)
+            adapter = None
+            mfr_errors_before = len(summary["errors"])
+            mfr_created_before = summary["created"]
+            mfr_updated_before = summary["updated"]
             try:
+                adapter = _make_adapter(mfr)
                 await adapter.authenticate()
 
                 result = await db.execute(
@@ -464,12 +497,14 @@ async def sync_devices() -> dict:
                         summary["errors"].append(err_msg)
                         logger.error("同步设备列表失败: %s", err_msg)
 
+                mfr_status = "success" if len(summary["errors"]) == mfr_errors_before else "partial"
+                mfr_records = (summary["created"] - mfr_created_before) + (summary["updated"] - mfr_updated_before)
                 await _create_sync_log(
                     db,
                     sync_type="device",
                     manufacturer_code=mfr.code,
-                    status="success" if not summary["errors"] else "partial",
-                    records_count=summary["created"] + summary["updated"],
+                    status=mfr_status,
+                    records_count=mfr_records,
                 )
 
                 await db.commit()
@@ -490,7 +525,11 @@ async def sync_devices() -> dict:
                     )
                     await log_db.commit()
             finally:
-                await adapter.close()
+                if adapter:
+                    try:
+                        await adapter.close()
+                    except Exception:
+                        pass
 
     return summary
 
@@ -507,8 +546,11 @@ async def sync_alarms() -> dict:
         manufacturers = await _get_active_manufacturers(db)
 
         for mfr in manufacturers:
-            adapter = _make_adapter(mfr)
+            adapter = None
+            mfr_errors_before = len(summary["errors"])
+            mfr_created_before = summary["created"]
             try:
+                adapter = _make_adapter(mfr)
                 await adapter.authenticate()
 
                 result = await db.execute(
@@ -566,16 +608,18 @@ async def sync_alarms() -> dict:
                         summary["errors"].append(err_msg)
                         logger.error("同步告警失败: %s", err_msg)
 
+                mfr_status = "success" if len(summary["errors"]) == mfr_errors_before else "partial"
+                mfr_records = summary["created"] - mfr_created_before
                 await _create_sync_log(
                     db,
                     sync_type="alarm",
                     manufacturer_code=mfr.code,
-                    status="success" if not summary["errors"] else "partial",
-                    records_count=summary["created"],
+                    status=mfr_status,
+                    records_count=mfr_records,
                 )
 
                 await db.commit()
-                logger.info("同步告警完成: 厂家=%s, 新增=%d", mfr.code, summary["created"])
+                logger.info("同步告警完成: 厂家=%s, 新增=%d", mfr.code, mfr_records)
             except Exception as exc:
                 await db.rollback()
                 err_msg = f"[{mfr.code}] {exc.__class__.__name__}: {exc}"
@@ -592,7 +636,11 @@ async def sync_alarms() -> dict:
                     )
                     await log_db.commit()
             finally:
-                await adapter.close()
+                if adapter:
+                    try:
+                        await adapter.close()
+                    except Exception:
+                        pass
 
     return summary
 

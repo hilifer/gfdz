@@ -166,18 +166,25 @@ class SungrowAdapter(BaseAdapter):
     async def get_station_realtime(self, station_code: str) -> StationRealtimeData | None:
         # getPowerStationList already includes real-time data for each station,
         # and getPlantRealData may require extra permissions (E900).
-        # Fetch station list and find the matching station.
-        body = await self._post("/openapi/getPowerStationList", {
-            "curPage": "1",
-            "size": "100",
-        })
-        result_data = body.get("result_data") or {}
-        items = result_data.get("pageList") or []
+        # Paginate through all pages until station is found.
+        page_no = 1
+        page_size = 100
         data = None
-        for s in items:
-            if str(s.get("ps_id")) == str(station_code):
-                data = s
+        while True:
+            body = await self._post("/openapi/getPowerStationList", {
+                "curPage": str(page_no), "size": str(page_size),
+            })
+            result_data = body.get("result_data") or {}
+            items = result_data.get("pageList") or []
+            if not items:
                 break
+            for s in items:
+                if str(s.get("ps_id")) == str(station_code):
+                    data = s
+                    break
+            if data is not None or len(items) < page_size:
+                break
+            page_no += 1
         if data is None:
             return None
 

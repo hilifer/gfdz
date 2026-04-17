@@ -1,0 +1,64 @@
+name: Full Sync End-to-End Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/power-station-monitoring-S5mlX
+    paths:
+      - 'backend/app/services/sync_service.py'
+      - 'backend/app/adapters/**'
+      - '.github/workflows/full-sync-test.yml'
+      - '.github/scripts/run_full_sync.py'
+
+jobs:
+  full-sync:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gfdz
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/gfdz
+      REDIS_URL: redis://localhost:6379/0
+      JWT_SECRET: test-secret-for-ci-only
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -U postgres && break
+            sleep 1
+          done
+
+      - name: Run full sync
+        run: |
+          cd backend
+          python -m scripts.run_full_sync
+        env:
+          PYTHONPATH: backend

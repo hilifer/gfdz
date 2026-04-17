@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import json
 import logging
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from email.utils import formatdate
 from time import mktime
 
@@ -258,13 +258,14 @@ class SolisAdapter(BaseAdapter):
         )
 
     async def get_alarms(self, station_code: str) -> list[AlarmInfo]:
+        # Solis 告警查询最大支持 31 天，默认拉取最近 7 天
         now = datetime.now(tz=timezone.utc)
-        one_day_ago = datetime(now.year, now.month, now.day, tzinfo=timezone.utc)
+        begin = now - timedelta(days=7)
         records = await self._post_all_pages(
             "/v1/api/alarmList",
             {
                 "stationId": station_code,
-                "alarmBeginTime": one_day_ago.strftime("%Y-%m-%d 00:00:00"),
+                "alarmBeginTime": begin.strftime("%Y-%m-%d 00:00:00"),
                 "alarmEndTime": now.strftime("%Y-%m-%d %H:%M:%S"),
             },
         )

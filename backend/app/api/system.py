@@ -1,4 +1,5 @@
 """系统设置接口"""
+import asyncio
 import logging
 from enum import Enum
 
@@ -114,44 +115,45 @@ async def trigger_manual_sync(
 ):
     """手动触发数据同步（仅管理员）。
 
-    将同步任务提交到 Celery 后台执行，立即返回 task_id。
+    在后台 asyncio 任务中执行同步，立即返回。
     支持的 sync_type: full / stations / realtime / daily / devices / alarms
     """
-    from app.tasks.sync_tasks import (
-        run_full_sync_task,
-        sync_all_stations_task,
-        sync_all_realtime,
-        sync_all_daily,
-        sync_all_devices_task,
-        sync_all_alarms,
+    from app.services.sync_service import (
+        run_full_sync,
+        sync_all_stations,
+        sync_realtime_data,
+        sync_daily_data,
+        sync_devices,
+        sync_alarms,
     )
 
     task_map = {
-        SyncType.full: run_full_sync_task,
-        SyncType.stations: sync_all_stations_task,
-        SyncType.realtime: sync_all_realtime,
-        SyncType.daily: sync_all_daily,
-        SyncType.devices: sync_all_devices_task,
-        SyncType.alarms: sync_all_alarms,
+        SyncType.full: run_full_sync,
+        SyncType.stations: sync_all_stations,
+        SyncType.realtime: sync_realtime_data,
+        SyncType.daily: sync_daily_data,
+        SyncType.devices: sync_devices,
+        SyncType.alarms: sync_alarms,
     }
 
     task_func = task_map.get(body.sync_type)
     if task_func is None:
         raise HTTPException(status_code=400, detail=f"未知的同步类型: {body.sync_type}")
 
-    try:
-        result = task_func.delay()
-        logger.info(
-            "手动同步已触发: type=%s, task_id=%s, operator=%s",
-            body.sync_type.value,
-            result.id,
-            user.username,
-        )
-        return {
-            "ok": True,
-            "message": f"同步任务已提交: {body.sync_type.value}",
-            "task_id": result.id,
-        }
-    except Exception as exc:
-        logger.error("提交同步任务失败: %s", exc, exc_info=True)
-        raise HTTPException(status_code=500, detail=f"提交同步任务失败: {exc}")
+    async def _runner():
+        try:
+            result = await task_func()
+            logger.info("手动同步完成: type=%s, result=%s", body.sync_type.value, result)
+        except Exception as e:
+            logger.error("手动同步执行失败: type=%s, err=%s", body.sync_type.value, e, exc_info=True)
+
+    asyncio.create_task(_runner())
+    logger.info(
+        "手动同步已触发: type=%s, operator=%s",
+        body.sync_type.value,
+        user.username,
+    )
+    return {
+        "ok": True,
+        "message": f"同步任务已提交: {body.sync_type.value}，请稍后在同步日志中查看结果",
+    }

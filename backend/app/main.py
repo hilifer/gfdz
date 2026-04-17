@@ -16,6 +16,28 @@ from app.pages import router as pages_router
 logger = logging.getLogger(__name__)
 
 
+async def _initial_sync_if_empty():
+    """启动时如果数据库为空则后台同步一次"""
+    from sqlalchemy import select, func
+    from app.database import async_session
+    from app.models.station import Station
+    from app.services.sync_service import run_full_sync
+
+    try:
+        # 等数据库连接稳定
+        await asyncio.sleep(3)
+        async with async_session() as db:
+            count = await db.scalar(select(func.count(Station.id)))
+        if count and count > 0:
+            logger.info("数据库已有 %d 个电站，跳过初始同步", count)
+            return
+        logger.info("数据库为空，开始后台同步各厂家数据...")
+        results = await run_full_sync()
+        logger.info("后台同步完成: %s", {k: (v.get("success", v.get("created", 0)) if isinstance(v, dict) else v) for k, v in results.items()})
+    except Exception as e:
+        logger.error("后台同步失败: %s", e, exc_info=True)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 等待数据库就绪，最多重试 30 次（约 30 秒）
@@ -31,9 +53,11 @@ async def lifespan(app: FastAPI):
                 logger.error("数据库连接失败，放弃重试")
                 raise
             await asyncio.sleep(1)
-    # 初始化默认管理员
+    # 初始化默认管理员和厂家
     from app.services.init_data import init_default_data
     await init_default_data()
+    # 后台触发首次同步（不阻塞应用启动）
+    asyncio.create_task(_initial_sync_if_empty())
     yield
 
 
